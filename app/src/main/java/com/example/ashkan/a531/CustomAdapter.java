@@ -78,7 +78,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
 
     private String calculateOneRepMax(int oneRepMax, double percentage) {
         //TODO:Careful for int division (75/100=0 with ints)
-        return String.valueOf(oneRepMax*(percentage/100));
+        double result=oneRepMax*(percentage/100);
+        return String.valueOf(5*(Math.round(result/5)));
     }
 
     @Override

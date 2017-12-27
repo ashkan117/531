@@ -2,17 +2,18 @@ package com.example.ashkan.a531;
 
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements CustomViewPagerAdapter.OnTextChangedListener{
+public class MainActivity extends AppCompatActivity implements CustomViewPagerAdapter.OnTextChangedListener,MyFragmentPageAdapter.OnTextChangedListener{
 
     public static final String CALC_FRAG = "calcFrag";
     public static final String SETS_FRAG = "sets_frag";
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
     private SetsFragment setsFragment;
     private TabLayout tabLayout;
     private ViewPager fragmentViewPager;
-    private MyFragmentPageAdapter pageAdapter;
+    private MyFragmentPageAdapter fragmentPageAdapter;
     private ViewPager viewPager;
     private String LIST_OF_ONE_REP_MAX="listOfOneRepMax";
     private CustomViewPagerAdapter pagerAdapter;
@@ -41,14 +42,15 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
         MyFragmentPageAdapter fragmentPageAdapter = new MyFragmentPageAdapter(fragmentManager);
         fragmentViewPager.setAdapter(fragmentPageAdapter);
         */
-        fragmentViewPager = (ViewPager) findViewById(R.id.fragment_view_pager);
-        viewPager =(ViewPager) findViewById(R.id.view_pager);
+        //fragmentViewPager = (ViewPager) findViewById(R.id.fragment_view_pager);
+        //viewPager =(ViewPager) findViewById(R.id.view_pager);
         setUpPagerAdapter(savedInstanceState);
         setUpFragmentAdapter(savedInstanceState);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 fragmentViewPager.setCurrentItem(position);
+
             }
 
             @Override
@@ -61,7 +63,24 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
 
             }
         });
-        fragmentViewPager.setAdapter(pageAdapter);
+        fragmentViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        fragmentViewPager.setAdapter(fragmentPageAdapter);
         //tabLayout = (TabLayout) findViewById(R.id.tabs);
         //tabLayout.setupWithViewPager(fragmentViewPager);
         //setUpCustomTabs();
@@ -96,11 +115,12 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
             listOf1rpm=savedInstanceState.getIntegerArrayList(LIST_OF_ONE_REP_MAX);
         }
 
-        pageAdapter = new MyFragmentPageAdapter(getSupportFragmentManager());
-        pageAdapter.addFragment(SetsFragment.newInstance(0,listOf1rpm.get(0)),"benchPressFragment",100);
-        pageAdapter.addFragment(SetsFragment.newInstance(1,listOf1rpm.get(1)),"squatFragment",100);
-        pageAdapter.addFragment(SetsFragment.newInstance(2,listOf1rpm.get(2)),"deadliftFragment",100);
-        pageAdapter.addFragment(SetsFragment.newInstance(3,listOf1rpm.get(3)),"overheadPressFragment",100);
+        fragmentPageAdapter = new MyFragmentPageAdapter(getSupportFragmentManager());
+        ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
+        fragmentPageAdapter.addFragment(SetsFragment.newInstance(0,listOf1rpm));
+        fragmentPageAdapter.addFragment(SetsFragment.newInstance(1,listOf1rpm));
+        fragmentPageAdapter.addFragment(SetsFragment.newInstance(2,listOf1rpm));
+        fragmentPageAdapter.addFragment(SetsFragment.newInstance(3,listOf1rpm));
     }
 
     private void setUpCustomTabs() {
@@ -125,8 +145,12 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
         tabLayout.getTabAt(3).setCustomView(overheadPress);
     }
 
+
     @Override
-    public int[] onWeightEntered(int positionOfPager, int weightEntered) {
+    public int[] onWeightEntered(int positionOfPager, ArrayList<Integer> oneRepMaxList) {
+        Log.v("MainActivity",""+oneRepMaxList.get(positionOfPager));
+        pagerAdapter.replaceView(positionOfPager,oneRepMaxList);
+        fragmentPageAdapter.replaceFragment(positionOfPager,oneRepMaxList);
         return new int[]{};
     }
 }

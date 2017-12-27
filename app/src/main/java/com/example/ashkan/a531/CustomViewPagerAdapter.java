@@ -6,11 +6,15 @@ import android.support.v4.view.PagerAdapter;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +36,14 @@ public class CustomViewPagerAdapter extends PagerAdapter {
     private TextView typeOfExerciseTextView;
     private EditText oneRepMaxEditText;
     private OnTextChangedListener listener;
+    private Button weightEnteredButton;
+
+    public void replaceView(int positionOfPager, ArrayList<Integer> oneRepMaxList) {
+        mOneRepMaxList.set(positionOfPager,oneRepMaxList.get(positionOfPager));
+    }
+
     interface OnTextChangedListener{
-        int[] onWeightEntered (int positionOfPager, int weightEntered);
+        int[] onWeightEntered (int positionOfPager, ArrayList<Integer> weightEntered);
     }
 
     public CustomViewPagerAdapter(Context context, List<Integer> oneRepMaxList){
@@ -59,52 +69,39 @@ public class CustomViewPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(final ViewGroup container, final int position) {
         //ready the viewItem
             //therefore we must inflate ht eparent to access
-        Log.v("PageAdapter","Position is "+position);
         View viewGroup=this.mLayoutInflater.inflate(R.layout.custom_tab_item,container,false);
         typeOfExerciseTextView = (TextView) viewGroup.findViewById(R.id.type_of_exercise_text_view);
         typeOfExerciseTextView.setText(mListOfExerciseNames.get(position));
         oneRepMaxEditText = (EditText) viewGroup.findViewById(R.id.weight_edit_text_view);
+        weightEnteredButton = (Button) viewGroup.findViewById(R.id.weight_ready_button);
         final int tempPosition=position;
-        oneRepMaxEditText.addTextChangedListener(new TextWatcher() {
-            boolean _ignore=false;
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //TODO:makes sure that we only do it once each time
-                if (_ignore)
-                    return;
-
-                _ignore = true; // prevent infinite loop
-                // Change your text here.
-                String versionString=s.toString();
-                int versionInt=Integer.parseInt(versionString);
-                oneRepMaxEditText.setText(s.toString());
-                mOneRepMaxList.set(tempPosition,Integer.parseInt(s.toString()));
-                listener.onWeightEntered(tempPosition,versionInt);
-                //TODO:implement interface to allow us to update
-                //TODO:changing edittext changes adjacent ones
-                _ignore = false; // release, so the TextWatcher start to listen again.
-            }
-        });
+        Log.v("CustomViewPageAdapter","newWEight entered is "+oneRepMaxEditText.getText().toString());
+        //Got rid of TextWatcher, wasnt working properly, need to relearn and retry later
         if(mOneRepMaxList.get(position)!=null)
         {
             //TODO: toString fixes it but why? Isnt the list already a string
             //NO ITS NOT. ITS AN INT THAT REPRESENTS 1RPM
             oneRepMaxEditText.setText(mOneRepMaxList.get(position).toString());
         }
+        Log.v("CustomViewPageAdapter","newWEight entered is "+oneRepMaxEditText.getText().toString());
+        oneRepMaxEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    String text = v.getText().toString();
+                    Log.v("CustomViewPageAdapter","newWEight entered is "+v.getText().toString());
+                    mOneRepMaxList.set(position,Integer.parseInt(text));
+                    listener.onWeightEntered(tempPosition,mOneRepMaxList);
+                    return true;
+                }
+                return false;
+            }
+        });
         container.addView(viewGroup);
+
         //TODO: MUST ADD VIEW to Container(In this case this is the ViewPager)
         return viewGroup;
     }

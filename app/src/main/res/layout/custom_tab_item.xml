@@ -8,7 +8,8 @@
     tools:layout_editor_absoluteY="0dp"
     tools:layout_editor_absoluteX="8dp">
 
-        <TextView
+
+    <TextView
             android:id="@+id/type_of_exercise_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,20 +24,39 @@
             tools:text="Bench Press"
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_bias="0.501" />
-        <EditText
-            android:id="@+id/weight_edit_text_view"
-            android:layout_width="368dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            tools:height="40dp"
-            android:inputType="number"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintTop_toBottomOf="@+id/type_of_exercise_text_view" />
+
+    <EditText
+        android:id="@+id/weight_edit_text_view"
+        android:imeOptions="actionDone"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:inputType="textVisiblePassword|number"
+        android:selectAllOnFocus="true"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/type_of_exercise_text_view"
+        tools:height="40dp" >
+        <requestFocus/>
+    </EditText>
+
+    <Button
+        android:id="@+id/weight_ready_button"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
+        android:text="Go"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@+id/weight_edit_text_view"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/weight_edit_text_view" />
+
     </android.support.constraint.ConstraintLayout>
