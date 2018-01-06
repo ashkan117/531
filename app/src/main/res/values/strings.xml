@@ -16,6 +16,13 @@
     </string-array>
     <string name="title_activity_main_screen">MainScreen</string>
 
+    <string-array name="exercises_string_array">
+        <item>"Bench Press"</item>
+        <item>"Squat</item>
+        <item>"Deadlift"</item>
+        <item>"Overhead Press"</item>
+    </string-array>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

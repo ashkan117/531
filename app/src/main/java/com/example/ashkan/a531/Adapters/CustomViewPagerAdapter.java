@@ -1,4 +1,4 @@
-package com.example.ashkan.a531;
+package com.example.ashkan.a531.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +44,7 @@ public class CustomViewPagerAdapter extends PagerAdapter {
         mOneRepMaxList.set(positionOfPager,oneRepMaxList.get(positionOfPager));
     }
 
-    interface OnTextChangedListener{
+    public interface OnTextChangedListener{
         int[] onWeightEntered (int positionOfPager, ArrayList<Integer> weightEntered);
     }
 
@@ -76,7 +78,6 @@ public class CustomViewPagerAdapter extends PagerAdapter {
         typeOfExerciseTextView = (TextView) viewGroup.findViewById(R.id.type_of_exercise_text_view);
         typeOfExerciseTextView.setText(mListOfExerciseNames.get(position));
         oneRepMaxEditText = (EditText) viewGroup.findViewById(R.id.weight_edit_text_view);
-        weightEnteredButton = (Button) viewGroup.findViewById(R.id.weight_ready_button);
         final int tempPosition=position;
         Log.v("CustomViewPageAdapter","newWEight entered is "+oneRepMaxEditText.getText().toString());
         //Got rid of TextWatcher, wasnt working properly, need to relearn and retry later
@@ -104,6 +105,11 @@ public class CustomViewPagerAdapter extends PagerAdapter {
 
         //TODO: MUST ADD VIEW to Container(In this case this is the ViewPager)
         return viewGroup;
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return (CharSequence) mListOfExerciseNames.toArray()[position];
     }
 
     @Override
