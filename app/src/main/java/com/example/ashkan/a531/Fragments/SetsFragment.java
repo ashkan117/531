@@ -1,13 +1,17 @@
 package com.example.ashkan.a531.Fragments;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,8 +19,6 @@ import com.example.ashkan.a531.Adapters.CustomAdapter;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
-
-import static android.R.id.edit;
 
 /**
  * Created by Ashkan on 12/19/2017.
@@ -34,6 +36,8 @@ public class SetsFragment extends android.support.v4.app.Fragment {
     private String mTypeOfExercise;
     private int mWeightLifted;
     private OnSetsFragmentRecoveredStateListener stateListener;
+
+
 
 
     public interface OnSetsFragmentRecoveredStateListener{
@@ -93,6 +97,7 @@ public class SetsFragment extends android.support.v4.app.Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         Log.v("Tag: ","1");
         mContext = getContext();
         stateListener = (OnSetsFragmentRecoveredStateListener) mContext;
@@ -147,6 +152,26 @@ public class SetsFragment extends android.support.v4.app.Fragment {
 
     private void initItems() {
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.weight_help_setting:
+                WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
+                FragmentManager manager = ((AppCompatActivity)mContext).getFragmentManager();
+
+                dialogFragment.show(manager,"weightHelperDialogFragment");
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //TODO: the second parameter should NOT be null. It means the menu to inflate to
+
+        inflater.inflate(R.menu.sets_fragment_menu,menu);
     }
 
     private void setUpWhichExercise() {

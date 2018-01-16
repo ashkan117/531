@@ -37,7 +37,7 @@ public class DataManager {
         }
     }
 
-    private static int updateWeekEntry(Week week, OneRepMaxDataBaseHelper dbHelper) {
+    public static int updateWeekEntry(Week week, OneRepMaxDataBaseHelper dbHelper) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = contentValuesFromWeek(week);
         String where = OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER+" =? ";
@@ -121,5 +121,10 @@ public class DataManager {
             values.put(OneRepMaxEntry.COLUMN_NAME_OHP,week.getOhp());
         }
         db.update(OneRepMaxEntry.TABLE_NAME,values,where,whereArgs);
+    }
+
+    public static void saveNote(int currentItemPosition,OneRepMaxDataBaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
     }
 }

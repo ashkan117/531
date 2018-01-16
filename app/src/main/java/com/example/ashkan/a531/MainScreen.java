@@ -1,8 +1,7 @@
 package com.example.ashkan.a531;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -22,35 +21,28 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
 import com.example.ashkan.a531.Adapters.MyFragmentPageAdapter;
-import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
 import com.example.ashkan.a531.Fragments.GraphFragment;
-import com.example.ashkan.a531.Fragments.GraphPointDialogFragment;
+import com.example.ashkan.a531.Fragments.NotesFragment;
 import com.example.ashkan.a531.Fragments.SetsFragment;
 import com.example.ashkan.a531.Fragments.TableFragment;
+import com.example.ashkan.a531.Fragments.WeightHelperDialogFragment;
 
 import java.util.ArrayList;
-
-import static android.R.attr.y;
-import static android.R.id.edit;
-import static android.os.Build.VERSION_CODES.M;
-import static android.view.View.GONE;
 
 public class MainScreen extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         CustomViewPagerAdapter.OnTextChangedListener,MyFragmentPageAdapter.UpdateTabLayout,
         GraphFragment.GetWeekInformationFromSetFragment
-        ,SetsFragment.OnSetsFragmentRecoveredStateListener{
+        ,SetsFragment.OnSetsFragmentRecoveredStateListener {
 
     private static final String BENCH_PRESS_PREFERENCE = "benchPressPreference";
     private static final String SQUAT_PREFERENCE = "sqautPreference";
@@ -61,14 +53,25 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private CustomViewPagerAdapter tabViewPagerAdapter;
     private MyFragmentPageAdapter fragmentPageAdapter;
     private TabLayout tabLayout;
-    private android.app.FragmentManager fragmanager;
-    private android.app.FragmentTransaction mFragmentTransaction;
+    private android.support.v4.app.FragmentManager mFragmentManager;
+    private FragmentTransaction mFragmentTransaction;
     public static final String ONE_REP_MAX_LIST = "ONE_REP_MAX_LIST";
     OneRepMaxDataBaseHelper dbHelper = new OneRepMaxDataBaseHelper(this);
     private EditText oneRepMaxEditText;
     private String PREFS_NAME="MainScreenSharedPrefs";
-    private FragmentManager supportFragmentManager;
-    private FragmentTransaction mSupportFragmentTransaction;
+    private ConstraintLayout tabAndViewPagerLayout;
+    private int navMenuIndex = 0;
+    private TabLayout navTabLayout;
+    private int NOTES_MENU_INDEX =2 ;
+    private int PROGRESS_NAV_MENU_ITEM=1;
+    private int CALCULATOR_NAV_MENU_INDEX = 3;
+    private int SETS_NAV_MENU_INDEX=0;
+    private int TABLE_NAV_MENU_INDEX;
+    private View otherFragmentsLayout;
+    private String ACTIVE_FRAGMENT="";
+    private String GRAPH_FRAGMENT_TAG="graphFragment";
+    private String CALCULATOR_FRAGMENT_TAG="calculatorFragment";
+    private String NOTES_FRAGMENT_TAG="notesFragment";
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
@@ -86,6 +89,24 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
 
         mOneRepMaxList = new ArrayList<>();
 
+        loadSharedPreferences(savedInstanceState);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        init();
+        setUpCustomTabView();
+
+        // Iterate over all tabs and set the custom view
+    }
+
+    private void loadSharedPreferences(Bundle savedInstanceState) {
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME,0);
         if(preferences.getInt(BENCH_PRESS_PREFERENCE,-1)!=-1){
             mOneRepMaxList.add(preferences.getInt(BENCH_PRESS_PREFERENCE,-1));
@@ -102,30 +123,34 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
                 mOneRepMaxList.add(100);
             }
         }
-        fragmanager = getFragmentManager();
-        supportFragmentManager =getSupportFragmentManager();
+    }
 
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+    private void init(){
+        tabAndViewPagerLayout = (ConstraintLayout) findViewById(R.id.main_container);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        navTabLayout = (TabLayout) findViewById(R.id.nav_tab_layout);
+        navTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onTabSelected(TabLayout.Tab tab) {
+                performProperTab(tab);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                performProperTab(tab);
             }
         });
-        */
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        invalidateOptionsMenu();
 
+        otherFragmentsLayout = findViewById(R.id.other_fragments);
 
-        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        mFragmentManager = getSupportFragmentManager();
         fragmentViewPager = (ViewPager) findViewById(R.id.fragment_view_pager);
 
         tabViewPagerAdapter = new CustomViewPagerAdapter(this, mOneRepMaxList);
@@ -140,15 +165,43 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
 
         fragmentViewPager.setAdapter(fragmentPageAdapter);
         tabLayout.setupWithViewPager(fragmentViewPager,true);
-        setUpCustomTabView();
-        // Iterate over all tabs and set the custom view
-
-
-
+    }
+    private void performProperTab(TabLayout.Tab tab) {
+        mFragmentTransaction = mFragmentManager.beginTransaction();
+        switch (tab.getText().toString()){
+            case "Progress" :
+                navMenuIndex= PROGRESS_NAV_MENU_ITEM;
+                hideSetView();
+                mFragmentTransaction.replace(R.id.other_fragments,new GraphFragment(), GRAPH_FRAGMENT_TAG);
+                mFragmentTransaction.commit();
+                break;
+            case "Calculator":
+                navMenuIndex= CALCULATOR_NAV_MENU_INDEX;
+                hideSetView();
+                mFragmentTransaction.replace(R.id.other_fragments,new CalculatorFragment(), CALCULATOR_FRAGMENT_TAG);
+                mFragmentTransaction.commit();
+                break;
+            case "Notes" :
+                navMenuIndex= NOTES_MENU_INDEX;
+                hideSetView();
+                //mFragmentTransaction = mFragmentManager.beginTransaction();
+                //removes fragment from the Id
+                //TODO: Might be solution to the ackwkard layout in main screen
+                //mFragmentManager.beginTransaction().remove(mFragmentManager.findFragmentById(R.id.main_container)).commit();
+//                mFragmentManager.executePendingTransactions();
+                NOTES_FRAGMENT_TAG = "NoteFragment";
+                mFragmentTransaction.replace(R.id.other_fragments,new NotesFragment(), NOTES_FRAGMENT_TAG);
+                mFragmentTransaction.commit();
+                break;
+            case "Workout":
+                showSetView();
+                break;
+        }
     }
 
-    private void setUpCustomTabView() {
 
+    private void setUpCustomTabView() {
+        //TODO: tablayout should be inside viewpager in XML (May have made things better)
         //Sets up our tabs
         setUpCustomTabs(0,"Bench Press");
         setUpCustomTabs(1,"Squat");
@@ -160,16 +213,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         findViewById(R.id.tab_layout).requestFocus();
         tabLayout.setScrollPosition(0,0f,true);
         fragmentViewPager.setCurrentItem(0);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        setUpCustomTabView();
-//        repopulateTabs(0,mOneRepMaxList);
-//        repopulateTabs(1,mOneRepMaxList);
-//        repopulateTabs(2,mOneRepMaxList);
-//        repopulateTabs(3,mOneRepMaxList);
     }
 
     private void setUpCustomTabs(final int position, String exerciseType) {
@@ -228,11 +271,20 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_screen, menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        if(navMenuIndex== SETS_NAV_MENU_INDEX){
+            getMenuInflater().inflate(R.menu.sets_fragment_menu, menu);
+        }
+        else if(navMenuIndex==NOTES_MENU_INDEX){
+            getMenuInflater().inflate(R.menu.fragment_notes_menu,menu);
+        }
+        else {
+            getMenuInflater().inflate(R.menu.main_screen, menu);
+        }
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -240,9 +292,13 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if(id==R.id.weight_help_setting){
+            WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
+            dialogFragment.show(getFragmentManager(),"weightHelperDialogFragment");
             return true;
         }
 
@@ -252,41 +308,47 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+        mFragmentTransaction = mFragmentManager.beginTransaction();
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.weights_nav_item) {
             // Handle the action
-            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_container);
-            frameLayout.setVisibility(View.GONE);
+            navMenuIndex=SETS_NAV_MENU_INDEX;
+            showSetView();
 
         }
         else if (id == R.id.progress_nav_item) {
-            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_container);
-            frameLayout.setVisibility(View.VISIBLE);
-//            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-//            frameLayout.setLayoutParams(layoutParams);
-            mFragmentTransaction = fragmanager.beginTransaction();
-            mFragmentTransaction.replace(R.id.main_container,new GraphFragment(),"GraphFragment");
+            hideSetView();
+            mFragmentTransaction.replace(R.id.other_fragments,new GraphFragment(),"GraphFragment");
             mFragmentTransaction.commit();
-//            tabLayout.setVisibility(GONE);
-//            fragmentViewPager.setVisibility(GONE);
-
+            navMenuIndex=PROGRESS_NAV_MENU_ITEM;
         }
         else if(id==R.id.table_nav_item){
-            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_container);
-            frameLayout.setVisibility(View.VISIBLE);
-            mFragmentTransaction = fragmanager.beginTransaction();
-            mFragmentTransaction.replace(R.id.main_container,new TableFragment(),"TableFragment");
+            hideSetView();
+            mFragmentTransaction.replace(R.id.other_fragments,new TableFragment(),"TableFragment");
             mFragmentTransaction.commit();
+            navMenuIndex= TABLE_NAV_MENU_INDEX;
         }
         else if(id==R.id.calculator_nav_item){
+            hideSetView();
+            android.app.Fragment fragment = getFragmentManager().findFragmentById(R.id.other_fragments);
+            //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.other_fragments)).commit();
+            mFragmentTransaction.replace(R.id.other_fragments, new CalculatorFragment(),"Calculator");
+            mFragmentTransaction.commit();
+            navMenuIndex=CALCULATOR_NAV_MENU_INDEX;
 
-            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_container);
-            frameLayout.setVisibility(View.VISIBLE);
-            mSupportFragmentTransaction = supportFragmentManager.beginTransaction();
-            mSupportFragmentTransaction.replace(R.id.main_container, new CalculatorFragment(),"Calculator");
-            mSupportFragmentTransaction.commit();
+        }
+        else if(id==R.id.notes_nav_item){
+
+            navMenuIndex=NOTES_MENU_INDEX;
+            hideSetView();
+            //removes fragment from the Id
+            //TODO: Might be solution to the awkard layout in main screen
+            mFragmentTransaction.replace(R.id.other_fragments,new NotesFragment(),"NoteFragment");
+            Fragment frag = mFragmentManager.findFragmentById(R.id.other_fragments);
+            mFragmentTransaction.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -294,6 +356,15 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         return true;
     }
 
+    private void hideSetView() {
+        tabAndViewPagerLayout.setVisibility(View.GONE);
+        otherFragmentsLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void showSetView(){
+        tabAndViewPagerLayout.setVisibility(View.VISIBLE);
+        otherFragmentsLayout.setVisibility(View.GONE);
+    }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

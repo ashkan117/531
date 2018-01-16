@@ -9,7 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import com.example.ashkan.a531.Adapters.CustomAdapter;
 import com.example.ashkan.a531.Adapters.GraphRecycleViewAdapter;
 import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
@@ -18,12 +20,14 @@ import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
 
+import static com.example.ashkan.a531.Data.DataManager.updateWeekEntry;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TableFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TableFragment extends Fragment {
+public class TableFragment extends android.support.v4.app.Fragment implements GraphRecycleViewAdapter.EditTextListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -37,7 +41,14 @@ public class TableFragment extends Fragment {
     private ArrayList<Week> mListOfWeeks;
     private OneRepMaxDataBaseHelper helperDatabase;
     private Context mContext;
+    private Button updateButton;
+    private boolean mBeenFocused=false;
+    private LinearLayoutManager mLayoutManager;
+    private UpdateGraphListener graphListener;
 
+    public interface  UpdateGraphListener{
+        void updateGraphAfterNewTable();
+    }
 
     public TableFragment() {
         // Required empty public constructor
@@ -88,9 +99,51 @@ public class TableFragment extends Fragment {
             // Inflate the layout for this fragment
             View viewGroup = (View) inflater.inflate(R.layout.fragment_table,container,false);
             mRecyclerView = (RecyclerView) viewGroup.findViewById(R.id.graph_recycler_view);
-            recycleViewAdapter = new GraphRecycleViewAdapter(getContext(), mListOfWeeks);
+            recycleViewAdapter = new GraphRecycleViewAdapter(getContext(), mListOfWeeks,this,getActivity());
             mRecyclerView.setAdapter(recycleViewAdapter);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            mLayoutManager = new LinearLayoutManager(mContext);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            updateButton = (Button) viewGroup.findViewById(R.id.update_table_button);
+            updateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: Figure out a way to check if data has changed so we dont needlessly update the whole table
+                    /*
+                    //might work if i pass this fragment the information of the position of the adapter
+                    mListOfWeeks=recycleViewAdapter.requestData();
+                    int firstPostion =mLayoutManager.findFirstVisibleItemPosition();
+                    int lastPosition = mLayoutManager.findLastVisibleItemPosition();
+                    for(int i=firstPostion;i<lastPosition;i++){
+                        CustomAdapter.CustomViewHolder holder =
+                                (CustomAdapter.CustomViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+
+                    }
+                    */
+
+                }
+
+
+            });
             return viewGroup;
+    }
+
+    @Override
+    public void updateWeek(Week updatedWeek) {
+        for(int i=0;i<mListOfWeeks.size();i++){
+            Week currentWeek = mListOfWeeks.get(i);
+            if(mListOfWeeks.get(i).getWeekNumber()==updatedWeek.getWeekNumber())
+            {
+                mListOfWeeks.set(i,updatedWeek);
+                break;
+            }
+        }
+        int updatedRows=DataManager.updateWeekEntry(updatedWeek,helperDatabase);
+
+        //recycleViewAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void setBeenFocused() {
+        mBeenFocused = true;
     }
 }

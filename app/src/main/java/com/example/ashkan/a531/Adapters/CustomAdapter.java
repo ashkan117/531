@@ -21,12 +21,37 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
     private final int mOneRepMax;
     private int mPositionOfPager;
     private int NUMBER_OF_SETS=9;
+    private int[][] NUMBER_OF_REPS = new int[][]{
+            {5,3,1,3,3,3,5,5,5},
+            {5,3,1,3,5,3,5,3,5},
+            {5,3,1,3,3,3,3,3,3},
+            {5,3,1,3,3,3,5,5,5},
+    };
+    private int[] currentNumberOfReps;
+
+    private void setUpArray() {
+        switch (mPositionOfPager){
+            case 0:
+                currentNumberOfReps=NUMBER_OF_REPS[0];
+                break;
+            case 1:
+                currentNumberOfReps=NUMBER_OF_REPS[1];
+                break;
+            case 2:
+                currentNumberOfReps=NUMBER_OF_REPS[2];
+                break;
+            case 3 :
+                currentNumberOfReps=NUMBER_OF_REPS[3];
+                break;
+        }
+    }
 
     public CustomAdapter(Context context, int positionOfPager, int weightLifted){
         mContext=context;
         mLayoutInflater=LayoutInflater.from(context);
         mPositionOfPager=positionOfPager;
         mOneRepMax =weightLifted;
+        setUpArray();
     }
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -41,39 +66,39 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
         switch (position){
             case 0:
                 holder.percentageOfWeight.setText("75%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,75));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,75)+" * "+currentNumberOfReps[position]);
                 break;
             case 1:
                 holder.percentageOfWeight.setText("85%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,85));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,85)+" * "+currentNumberOfReps[position]);
                 break;
             case 2:
                 holder.percentageOfWeight.setText("95%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,95));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,95)+" * "+currentNumberOfReps[position]+"+");
                 break;
             case 3:
                 holder.percentageOfWeight.setText("90%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,90));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,90)+" * "+currentNumberOfReps[position]);
                 break;
             case 4:
                 holder.percentageOfWeight.setText("85%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,85));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,85)+" * "+currentNumberOfReps[position]);
                 break;
             case 5:
                 holder.percentageOfWeight.setText("80%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,80));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,80)+" * "+currentNumberOfReps[position]);
                 break;
             case 6:
                 holder.percentageOfWeight.setText("75%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,75));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,75)+" * "+currentNumberOfReps[position]);
                 break;
             case 7:
                 holder.percentageOfWeight.setText("70%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,70));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,70)+" * "+currentNumberOfReps[position]);
                 break;
             case 8:
                 holder.percentageOfWeight.setText("65%");
-                holder.weight.setText(calculateOneRepMax(mOneRepMax,65));
+                holder.weight.setText(calculateOneRepMax(mOneRepMax,65)+" * "+currentNumberOfReps[position]+"+");
                 break;
         }
     }

@@ -3,6 +3,8 @@ package com.example.ashkan.a531;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,5 +24,9 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("com.example.ashkan.a531", appContext.getPackageName());
+    }
+    @Test
+    public void fragmentVsSupport() throws Exception {
+        // Context of the app under test.
     }
 }

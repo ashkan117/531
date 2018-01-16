@@ -1,8 +1,11 @@
 package com.example.ashkan.a531.Fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -50,11 +53,18 @@ public class CalculatorFragment extends android.support.v4.app.Fragment implemen
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calculator,container,false);
+        setHasOptionsMenu(true);
         //TODO:must use getText first for editText
         init(view);
         initPercentages(view);
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.main_screen,menu);
     }
 
     private void initPercentages(View view) {

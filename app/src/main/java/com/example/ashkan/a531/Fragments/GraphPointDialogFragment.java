@@ -23,7 +23,7 @@ import com.example.ashkan.a531.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class GraphPointDialogFragment extends DialogFragment {
+public class GraphPointDialogFragment extends android.support.v4.app.DialogFragment {
 
 
     private EditText weekNumberEditText;

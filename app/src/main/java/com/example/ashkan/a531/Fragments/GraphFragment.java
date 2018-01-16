@@ -5,9 +5,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +42,8 @@ import static java.util.Collections.sort;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class GraphFragment extends Fragment implements GraphPointDialogFragment.DialogListener{
+public class GraphFragment extends android.support.v4.app.Fragment implements GraphPointDialogFragment.DialogListener
+        ,TableFragment.UpdateGraphListener{
 
 
     private FloatingActionButton fab;
@@ -69,6 +70,11 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
 
     public GraphFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void updateGraphAfterNewTable() {
+        loadDataPoints();
     }
 
 
@@ -102,8 +108,8 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
         //FragmentManager manager = ((AppCompatActivity)mContext).getSupportFragmentManager();
         //GraphFragmentPagerAdapter pagerAdapter = new GraphFragmentPagerAdapter(manager);
 
-        initGraph();
         loadDataPoints();
+        initGraph();
         //handleSingularWeek();
         return viewGroup;
     }
@@ -139,6 +145,7 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
                 mWeekToInsert=informationFromSetFragmentListener.getWeekInfo();
                 mWeekToInsert.setWeekNumber(Integer.parseInt(mWeekNumberEditText.getText().toString()));
                 DataManager.addOneRepMax(mWeekToInsert,helperDatabase);
+                updateGraph();
             }
         });
         graph = (GraphView) viewGroup.findViewById(R.id.graph);
@@ -243,12 +250,24 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
 
 
     private void initGraph() {
+
+        //fixed/manual graph
+        if(mListOfWeeks.size()>0){
+            setFixedGraph();
+        }
+        else{
+            setScalableGraph();
+        }
+
+        //scalable graph
+
         //set some properties
         squatSeries.setColor(Color.RED);
         benchSeries.setColor(Color.GREEN);
         deadLiftSeries.setColor(Color.BLACK);
         ohpSeries.setColor(Color.BLUE);
 
+        //sets title for the legend
         benchSeries.setTitle("Bench Press");
         squatSeries.setTitle("Squat");
         deadLiftSeries.setTitle("Deadlift");
@@ -264,27 +283,69 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
         graph.getLegendRenderer().setVisible(true);
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
-        //set Scrollable and Scaleable
-        graph.getViewport().setScalable(true);
-        graph.getViewport().setScalableY(true);
-        graph.getViewport().setScrollable(true);
-        graph.getViewport().setScrollableY(true);
-
-        //set manual y bounds
-        graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMaxY(500);
-        graph.getViewport().setMinY(0);
-
-        //set manual x bounds
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMaxX(24);
-        graph.getViewport().setMinX(0);
-
         //add the series to the graph
         graph.addSeries(benchSeries);
         graph.addSeries(squatSeries);
         graph.addSeries(deadLiftSeries);
         graph.addSeries(ohpSeries);
+    }
+
+    private void setFixedGraph() {
+        //set manual y bounds
+        int maxY = getMaxY();
+        int count = mListOfWeeks.size();
+        int maxX = mListOfWeeks.get(count-1).getWeekNumber();
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMaxY(maxY+maxY*.1);
+        graph.getViewport().setMinY(0);
+
+        //set manual x bounds
+        graph.getViewport().setXAxisBoundsManual(true);
+        //so that points are not at edge
+        graph.getViewport().setMaxX(maxX+maxX*.1);
+        graph.getViewport().setMinX(0);
+
+
+    }
+
+    private int getMaxY() {
+        int currentBench;
+        int currentDeadlift;
+        int currentOhp;
+        int max = mListOfWeeks.get(0).getSquat();
+        for(int i=0;i<mListOfWeeks.size();i++){
+            max = mListOfWeeks.get(i).getSquat();
+            currentBench = mListOfWeeks.get(i).getBenchPress();
+            currentDeadlift = mListOfWeeks.get(i).getDeadlift();
+            currentOhp = mListOfWeeks.get(i).getOhp();
+            if(max<mListOfWeeks.get(i).getBenchPress()){
+                max = mListOfWeeks.get(i).getBenchPress();
+            }
+            else if(max<mListOfWeeks.get(i).getDeadlift()){
+                max = mListOfWeeks.get(i).getDeadlift();
+            }
+            else if(max<mListOfWeeks.get(i).getOhp()){
+                max = mListOfWeeks.get(i).getOhp();
+            }
+        }
+        return max;
+    }
+
+    private void setScalableGraph() {
+        // activate horizontal zooming and scrolling
+        graph.getViewport().setScalable(true);
+
+        // activate horizontal scrolling
+        graph.getViewport().setScrollable(true);
+
+        // activate horizontal and vertical zooming and scrolling
+        graph.getViewport().setScalableY(true);
+
+        // activate vertical scrolling
+        graph.getViewport().setScrollableY(true);
+
+        graph.getViewport().setMaxX(121);
+        graph.getViewport().setMinX(0);
     }
 
 
@@ -310,16 +371,31 @@ public class GraphFragment extends Fragment implements GraphPointDialogFragment.
         }
 
         updateListAndSort(mExerciseType);
-        updateGraph();
+        //updateGraph();
 
     }
 
     private void updateGraph() {
-        graph.removeAllSeries();
-        graph.addSeries(benchSeries);
-        graph.addSeries(squatSeries);
-        graph.addSeries(deadLiftSeries);
-        graph.addSeries(ohpSeries);
+        //graph.removeAllSeries();
+        //this removes all the series but we want to update them not remove
+        //  removing means we need to reattach series to graph
+        allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+        //Must sort DataPoints in asc order
+        sortInASC(allExercisesList);
+        //extracts the specific exercise from the total list into an array list of data points
+        DataPoint[] squat = getExersise1RPMFromDatabase(SQUAT, allExercisesList);
+        DataPoint[] bench = getExersise1RPMFromDatabase(BENCH_PRESS, allExercisesList);
+        DataPoint[] deadlift = getExersise1RPMFromDatabase(DEADLIFT, allExercisesList);
+        DataPoint[] ohp = getExersise1RPMFromDatabase(OHP, allExercisesList);
+        //assigns those data points to a LineGraphSeries
+        //ISSUE: using append when trying to update doesnt work the way i thought
+        //  append adds to the datapoint[]
+        //  reset is more appropriate
+        //      reset switches one datapoint[] with another
+        benchSeries.resetData(bench);
+        squatSeries.resetData(squat);
+        deadLiftSeries.resetData(deadlift);
+        ohpSeries.resetData(ohp);
     }
 
     private void updateListAndSort(String exercise) {

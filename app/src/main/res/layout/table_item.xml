@@ -1,58 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:rowCount="1"
+    android:columnCount="5"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/week_number_text_view"
         tools:text="Week: 5"
+        android:layout_width="44dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:gravity="left"
+        android:layout_margin="8dp"
+        android:text="TextView" />
+
+    <EditText
+        android:id="@+id/bench_press_max_edit_text_view"
+        tools:text="160"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:layout_columnWeight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="8dp"
+        android:text="TextView" />
+
+    <EditText
+        android:id="@+id/squat_max_edit_text_view"
+        tools:text="190"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:layout_columnWeight="1"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="TextView" />
 
-    <TextView
-        android:id="@+id/bench_press_max_text_view"
-        tools:text="160"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="32dp"
-        android:text="TextView" />
-
-    <TextView
-        android:id="@+id/squat_max_text_view"
-        tools:text="190"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="32dp"
-        android:text="TextView" />
-
-    <TextView
-        android:id="@+id/deadlift_max_text_view"
+    <EditText
+        android:id="@+id/deadlift_max_edit_text_view"
         tools:text="280"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:layout_columnWeight="1"
+        android:gravity="center"
         android:layout_width="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="32dp"
+        android:layout_margin="8dp"
         android:text="TextView" />
 
-    <TextView
-        android:id="@+id/ohp_max_text_view"
+    <EditText
+        android:id="@+id/ohp_max_edit_text_view"
         tools:text="150"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="32dp"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:layout_columnWeight="1"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:text="TextView" />
-</LinearLayout>
+</GridLayout>
