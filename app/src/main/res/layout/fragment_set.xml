@@ -1,13 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_weight="10"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/sets_recycler_view"
+    <android.support.design.widget.TabLayout
+        android:id="@+id/set_tab_layout"
+        android:layout_width="368dp"
+        android:layout_height="88dp"
+        android:layout_alignParentTop="true"
+        android:layout_margin="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:tabGravity="fill"
+        app:tabMode="scrollable">
+
+    </android.support.design.widget.TabLayout>
+
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/set_fragment_view_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/sets_list_item"></android.support.v7.widget.RecyclerView>
-</FrameLayout>
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/set_tab_layout">
+    </android.support.v4.view.ViewPager>
+</RelativeLayout>

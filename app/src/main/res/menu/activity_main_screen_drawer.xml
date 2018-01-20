@@ -4,24 +4,24 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/weights_nav_item"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_fitness_center_black_24dp"
             android:title="Workout" />
         <item
             android:id="@+id/progress_nav_item"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_trending_up_black_24dp"
             android:title="Graph" />
         <item
             android:id="@+id/table_nav_item"
-            android:icon="@color/cardview_dark_background"
+            android:icon="@drawable/ic_dehaze_black_24dp"
             android:title="Table"/>
 
         <item
             android:id="@+id/notes_nav_item"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="1RPM Calculator"/>
+            android:icon="@drawable/ic_assignment_black_24dp"
+            android:title="Notes"/>
         <item
             android:id="@+id/calculator_nav_item"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_keyboard_black_24dp"
             android:title="1RPM Calculator"/>
     </group>
 

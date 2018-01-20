@@ -12,14 +12,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
-import com.example.ashkan.a531.Adapters.MyFragmentPageAdapter;
+import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
 import com.example.ashkan.a531.Fragments.SetsFragment;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements CustomViewPagerAdapter.OnTextChangedListener,
-        MyFragmentPageAdapter.OnTextChangedListener{
+        SetFragmentPageAdapter.OnTextChangedListener{
 
     public static final String CALC_FRAG = "calcFrag";
     public static final String SETS_FRAG = "sets_frag";
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
     private SetsFragment setsFragment;
     private TabLayout tabLayout;
     private ViewPager fragmentViewPager;
-    private MyFragmentPageAdapter fragmentPageAdapter;
+    private SetFragmentPageAdapter fragmentPageAdapter;
     private ViewPager viewPager;
     private String LIST_OF_ONE_REP_MAX="listOfOneRepMax";
     private CustomViewPagerAdapter pagerAdapter;
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
         transaction=fragmentManager.beginTransaction();
         setsFragment=new SetsFragment();
         ViewPager fragmentViewPager = (ViewPager) findViewById(R.id.view_pager);
-        MyFragmentPageAdapter fragmentPageAdapter = new MyFragmentPageAdapter(fragmentManager);
+        SetFragmentPageAdapter fragmentPageAdapter = new SetFragmentPageAdapter(fragmentManager);
         fragmentViewPager.setAdapter(fragmentPageAdapter);
         */
         //fragmentViewPager = (ViewPager) findViewById(R.id.fragment_view_pager);
@@ -121,12 +121,9 @@ public class MainActivity extends AppCompatActivity implements CustomViewPagerAd
             listOf1rpm=savedInstanceState.getIntegerArrayList(LIST_OF_ONE_REP_MAX);
         }
 
-        //fragmentPageAdapter = new MyFragmentPageAdapter(getSupportFragmentManager());
+        //fragmentPageAdapter = new SetFragmentPageAdapter(getSupportFragmentManager());
         ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(0,listOf1rpm));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(1,listOf1rpm));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(2,listOf1rpm));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(3,listOf1rpm));
+
     }
 
     private void setUpCustomTabs() {

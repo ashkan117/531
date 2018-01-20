@@ -29,14 +29,11 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static android.R.attr.handle;
-import static android.media.CamcorderProfile.get;
 import static com.example.ashkan.a531.Data.DataManager.getListOfWeeks;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.BENCH_PRESS;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.DEADLIFT;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.OHP;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.SQUAT;
-import static java.util.Collections.sort;
 
 
 /**
@@ -258,6 +255,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         else{
             setScalableGraph();
         }
+        //setFixedGraph();
 
         //scalable graph
 
@@ -314,7 +312,6 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         int currentOhp;
         int max = mListOfWeeks.get(0).getSquat();
         for(int i=0;i<mListOfWeeks.size();i++){
-            max = mListOfWeeks.get(i).getSquat();
             currentBench = mListOfWeeks.get(i).getBenchPress();
             currentDeadlift = mListOfWeeks.get(i).getDeadlift();
             currentOhp = mListOfWeeks.get(i).getOhp();
@@ -344,7 +341,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         // activate vertical scrolling
         graph.getViewport().setScrollableY(true);
 
-        graph.getViewport().setMaxX(121);
+        graph.getViewport().setMaxX(5);
         graph.getViewport().setMinX(0);
     }
 

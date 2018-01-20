@@ -1,17 +1,21 @@
 package com.example.ashkan.a531.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
-import com.example.ashkan.a531.Adapters.CustomAdapter;
 import com.example.ashkan.a531.Adapters.GraphRecycleViewAdapter;
 import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
@@ -19,8 +23,6 @@ import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
-
-import static com.example.ashkan.a531.Data.DataManager.updateWeekEntry;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,8 +75,14 @@ public class TableFragment extends android.support.v4.app.Fragment implements Gr
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_table,menu);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mContext = getContext();
         helperDatabase = new OneRepMaxDataBaseHelper(mContext);
         mListOfWeeks = DataManager.getListOfWeeks(helperDatabase);
@@ -97,12 +105,32 @@ public class TableFragment extends android.support.v4.app.Fragment implements Gr
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             // Inflate the layout for this fragment
-            View viewGroup = (View) inflater.inflate(R.layout.fragment_table,container,false);
+            final View viewGroup = (View) inflater.inflate(R.layout.fragment_table,container,false);
             mRecyclerView = (RecyclerView) viewGroup.findViewById(R.id.graph_recycler_view);
             recycleViewAdapter = new GraphRecycleViewAdapter(getContext(), mListOfWeeks,this,getActivity());
             mRecyclerView.setAdapter(recycleViewAdapter);
             mLayoutManager = new LinearLayoutManager(mContext);
             mRecyclerView.setLayoutManager(mLayoutManager);
+        //0 applies to up or down
+            ItemTouchHelper.Callback simpleCallback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
+                @Override
+                public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                    return false;
+                }
+
+                @Override
+                public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                    int position =viewHolder.getAdapterPosition();
+                    mListOfWeeks.remove(position);
+                    deleteWeek(position);
+                    recycleViewAdapter.notifyItemRemoved(position);
+                }
+            };
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+            itemTouchHelper.attachToRecyclerView(mRecyclerView);
+            //make a simplecallback then
+            //send this to the callback
+            //attach this to recyclerview
             updateButton = (Button) viewGroup.findViewById(R.id.update_table_button);
             updateButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,8 +142,8 @@ public class TableFragment extends android.support.v4.app.Fragment implements Gr
                     int firstPostion =mLayoutManager.findFirstVisibleItemPosition();
                     int lastPosition = mLayoutManager.findLastVisibleItemPosition();
                     for(int i=firstPostion;i<lastPosition;i++){
-                        CustomAdapter.CustomViewHolder holder =
-                                (CustomAdapter.CustomViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                        SetFragmentItemRecycleViewAdapter.CustomViewHolder holder =
+                                (SetFragmentItemRecycleViewAdapter.CustomViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
 
                     }
                     */
@@ -125,6 +153,11 @@ public class TableFragment extends android.support.v4.app.Fragment implements Gr
 
             });
             return viewGroup;
+    }
+
+    private void deleteWeek(int position) {
+        int weekNumber = mListOfWeeks.get(position).getWeekNumber();
+        DataManager.deleteWeek(weekNumber,helperDatabase);
     }
 
     @Override
@@ -145,5 +178,17 @@ public class TableFragment extends android.support.v4.app.Fragment implements Gr
     @Override
     public void setBeenFocused() {
         mBeenFocused = true;
+    }
+
+    public void closeKeyBoard()
+    {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = getActivity().getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(getContext());
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }

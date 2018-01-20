@@ -15,6 +15,10 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            //TODO: allows android studio to download repositories when needed
+            url "https://maven.google.com"
+        }
     }
 }
 

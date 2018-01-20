@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -27,7 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
-import com.example.ashkan.a531.Adapters.MyFragmentPageAdapter;
+import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
@@ -40,9 +39,8 @@ import com.example.ashkan.a531.Fragments.WeightHelperDialogFragment;
 import java.util.ArrayList;
 
 public class MainScreen extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        CustomViewPagerAdapter.OnTextChangedListener,MyFragmentPageAdapter.UpdateTabLayout,
-        GraphFragment.GetWeekInformationFromSetFragment
-        ,SetsFragment.OnSetsFragmentRecoveredStateListener {
+        CustomViewPagerAdapter.OnTextChangedListener,
+        GraphFragment.GetWeekInformationFromSetFragment{
 
     private static final String BENCH_PRESS_PREFERENCE = "benchPressPreference";
     private static final String SQUAT_PREFERENCE = "sqautPreference";
@@ -51,7 +49,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private ArrayList<Integer> mOneRepMaxList;
     private ViewPager fragmentViewPager;
     private CustomViewPagerAdapter tabViewPagerAdapter;
-    private MyFragmentPageAdapter fragmentPageAdapter;
+    private SetFragmentPageAdapter fragmentPageAdapter;
     private TabLayout tabLayout;
     private android.support.v4.app.FragmentManager mFragmentManager;
     private FragmentTransaction mFragmentTransaction;
@@ -72,6 +70,8 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private String GRAPH_FRAGMENT_TAG="graphFragment";
     private String CALCULATOR_FRAGMENT_TAG="calculatorFragment";
     private String NOTES_FRAGMENT_TAG="notesFragment";
+    private String SETS_FRAGMENT_TAG;
+    private String TABLE_FRAGMENT_TAG;
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
@@ -87,6 +87,8 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mFragmentManager = getSupportFragmentManager();
+        mFragmentTransaction = mFragmentManager.beginTransaction();
         mOneRepMaxList = new ArrayList<>();
 
         loadSharedPreferences(savedInstanceState);
@@ -101,9 +103,10 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         navigationView.setNavigationItemSelectedListener(this);
 
         init();
-        setUpCustomTabView();
 
-        // Iterate over all tabs and set the custom view
+        mFragmentTransaction.add(R.id.other_fragments,new SetsFragment(),SETS_FRAGMENT_TAG)
+            .commit();
+
     }
 
     private void loadSharedPreferences(Bundle savedInstanceState) {
@@ -126,8 +129,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     }
 
     private void init(){
-        tabAndViewPagerLayout = (ConstraintLayout) findViewById(R.id.main_container);
-        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         navTabLayout = (TabLayout) findViewById(R.id.nav_tab_layout);
         navTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -150,40 +151,26 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
 
         otherFragmentsLayout = findViewById(R.id.other_fragments);
 
-        mFragmentManager = getSupportFragmentManager();
-        fragmentViewPager = (ViewPager) findViewById(R.id.fragment_view_pager);
-
-        tabViewPagerAdapter = new CustomViewPagerAdapter(this, mOneRepMaxList);
-
-        fragmentPageAdapter = new MyFragmentPageAdapter(this,getSupportFragmentManager(),tabLayout);
-
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(0, mOneRepMaxList));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(1, mOneRepMaxList));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(2, mOneRepMaxList));
-        fragmentPageAdapter.addFragment(SetsFragment.newInstance(3, mOneRepMaxList));
-
-
-        fragmentViewPager.setAdapter(fragmentPageAdapter);
-        tabLayout.setupWithViewPager(fragmentViewPager,true);
     }
+
     private void performProperTab(TabLayout.Tab tab) {
         mFragmentTransaction = mFragmentManager.beginTransaction();
         switch (tab.getText().toString()){
             case "Progress" :
                 navMenuIndex= PROGRESS_NAV_MENU_ITEM;
-                hideSetView();
+                //hideSetView();
                 mFragmentTransaction.replace(R.id.other_fragments,new GraphFragment(), GRAPH_FRAGMENT_TAG);
                 mFragmentTransaction.commit();
                 break;
             case "Calculator":
                 navMenuIndex= CALCULATOR_NAV_MENU_INDEX;
-                hideSetView();
+                //hideSetView();
                 mFragmentTransaction.replace(R.id.other_fragments,new CalculatorFragment(), CALCULATOR_FRAGMENT_TAG);
                 mFragmentTransaction.commit();
                 break;
             case "Notes" :
                 navMenuIndex= NOTES_MENU_INDEX;
-                hideSetView();
+                //hideSetView();
                 //mFragmentTransaction = mFragmentManager.beginTransaction();
                 //removes fragment from the Id
                 //TODO: Might be solution to the ackwkard layout in main screen
@@ -194,81 +181,16 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
                 mFragmentTransaction.commit();
                 break;
             case "Workout":
-                showSetView();
+                navMenuIndex= SETS_NAV_MENU_INDEX;
+                //hideSetView();
+                SETS_FRAGMENT_TAG = "SetsFragment";
+                mFragmentTransaction.replace(R.id.other_fragments,new SetsFragment(), SETS_FRAGMENT_TAG);
+                mFragmentTransaction.commit();
                 break;
         }
     }
 
 
-    private void setUpCustomTabView() {
-        //TODO: tablayout should be inside viewpager in XML (May have made things better)
-        //Sets up our tabs
-        setUpCustomTabs(0,"Bench Press");
-        setUpCustomTabs(1,"Squat");
-        setUpCustomTabs(2,"Deadlift");
-        setUpCustomTabs(3,"Overhead Press");
-
-        //gets focus to just focus on the tablayout
-        //otherwise the edittext always grabs focus on the last item
-        findViewById(R.id.tab_layout).requestFocus();
-        tabLayout.setScrollPosition(0,0f,true);
-        fragmentViewPager.setCurrentItem(0);
-    }
-
-    private void setUpCustomTabs(final int position, String exerciseType) {
-
-        final ConstraintLayout tabGroupView = (ConstraintLayout) getLayoutInflater().inflate(R.layout.custom_tab_item,null);
-        final EditText oneRepMaxEditText = (EditText) tabGroupView.findViewById(R.id.weight_edit_text_view);
-        TextView title = (TextView) tabGroupView.findViewById(R.id.type_of_exercise_text_view);
-
-        //oneRepMaxEditText.setText("100");
-        //mOneRepMaxList.size();
-        title.setText(exerciseType);
-        tabLayout.getTabAt(position).setText("TITLE?");
-        oneRepMaxEditText.setText(mOneRepMaxList.get(position).toString());
-        String input=oneRepMaxEditText.getText().toString();
-        oneRepMaxEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    String text = v.getText().toString();
-                    Log.v("CustomViewPageAdapter","newWEight entered is "+text);
-                    mOneRepMaxList.set(position,Integer.parseInt(text));
-                    //SetsFragment setsFragment= SetsFragment.newInstance(position,mOneRepMaxList);
-
-                    fragmentPageAdapter.replaceFragment(position, mOneRepMaxList);
-
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        tabLayout.getTabAt(position).setCustomView(tabGroupView);
-
-    }
-
-    public void closeKeyBoard()
-    {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(this);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -316,26 +238,29 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         if (id == R.id.weights_nav_item) {
             // Handle the action
             navMenuIndex=SETS_NAV_MENU_INDEX;
-            showSetView();
+            mFragmentTransaction.replace(R.id.other_fragments,new SetsFragment(),SETS_FRAGMENT_TAG);
+            mFragmentTransaction.commit();
+            //showSetView();
 
         }
         else if (id == R.id.progress_nav_item) {
-            hideSetView();
-            mFragmentTransaction.replace(R.id.other_fragments,new GraphFragment(),"GraphFragment");
+            //SetView();
+            mFragmentTransaction.replace(R.id.other_fragments,new GraphFragment(),GRAPH_FRAGMENT_TAG);
             mFragmentTransaction.commit();
             navMenuIndex=PROGRESS_NAV_MENU_ITEM;
         }
         else if(id==R.id.table_nav_item){
-            hideSetView();
-            mFragmentTransaction.replace(R.id.other_fragments,new TableFragment(),"TableFragment");
+            //hideSetView();
+            TABLE_FRAGMENT_TAG = "TableFragment";
+            mFragmentTransaction.replace(R.id.other_fragments,new TableFragment(), TABLE_FRAGMENT_TAG);
             mFragmentTransaction.commit();
             navMenuIndex= TABLE_NAV_MENU_INDEX;
         }
         else if(id==R.id.calculator_nav_item){
-            hideSetView();
+            //hideSetView();
             android.app.Fragment fragment = getFragmentManager().findFragmentById(R.id.other_fragments);
             //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.other_fragments)).commit();
-            mFragmentTransaction.replace(R.id.other_fragments, new CalculatorFragment(),"Calculator");
+            mFragmentTransaction.replace(R.id.other_fragments, new CalculatorFragment(),CALCULATOR_FRAGMENT_TAG);
             mFragmentTransaction.commit();
             navMenuIndex=CALCULATOR_NAV_MENU_INDEX;
 
@@ -343,10 +268,10 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         else if(id==R.id.notes_nav_item){
 
             navMenuIndex=NOTES_MENU_INDEX;
-            hideSetView();
+            //hideSetView();
             //removes fragment from the Id
             //TODO: Might be solution to the awkard layout in main screen
-            mFragmentTransaction.replace(R.id.other_fragments,new NotesFragment(),"NoteFragment");
+            mFragmentTransaction.replace(R.id.other_fragments,new NotesFragment(),NOTES_FRAGMENT_TAG);
             Fragment frag = mFragmentManager.findFragmentById(R.id.other_fragments);
             mFragmentTransaction.commit();
         }
@@ -356,15 +281,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         return true;
     }
 
-    private void hideSetView() {
-        tabAndViewPagerLayout.setVisibility(View.GONE);
-        otherFragmentsLayout.setVisibility(View.VISIBLE);
-    }
-
-    private void showSetView(){
-        tabAndViewPagerLayout.setVisibility(View.VISIBLE);
-        otherFragmentsLayout.setVisibility(View.GONE);
-    }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -386,19 +302,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     * ReplaceFragment calls this method to allow us to update the tablayout to the newly entered numbers
     * Otherwise the page goes blank
     */
-    @Override
-    public void updateTabLayout(int position, ArrayList<Integer> oneRepMaxList) {
-        setUpCustomTabs(0,"Bench Press",oneRepMaxList);
-        setUpCustomTabs(1,"Squat",oneRepMaxList);
-        setUpCustomTabs(2,"Deadlift",oneRepMaxList);
-        setUpCustomTabs(3,"Overhead Press",oneRepMaxList);
-
-        //again we need to make sure that the edittext doesnt force getting the focus
-        closeKeyBoard();
-        tabLayout.setScrollPosition(position,0f,true);
-        fragmentViewPager.setCurrentItem(position);
-        fragmentViewPager.requestFocus();
-    }
 
     @Override
     protected void onPause() {
@@ -412,39 +315,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         editor.commit();
     }
 
-    private void setUpCustomTabs(final int position, String exerciseType, ArrayList<Integer> oneRepMaxList) {
-
-        final ConstraintLayout tabGroupView = (ConstraintLayout) getLayoutInflater().inflate(R.layout.custom_tab_item,null);
-        EditText oneRepMaxEditText = (EditText) tabGroupView.findViewById(R.id.weight_edit_text_view);
-        TextView title = (TextView) tabGroupView.findViewById(R.id.type_of_exercise_text_view);
-
-        oneRepMaxEditText.setText(String.valueOf(oneRepMaxList.get(position)));
-        String tabString=oneRepMaxEditText.getText().toString();
-        title.setText(exerciseType);
-        //tabLayout.getTabAt(position).setText("TITLE?");
-
-        oneRepMaxEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    String text = v.getText().toString();
-                    Log.v("CustomViewPageAdapter","newWEight entered is "+text);
-                    mOneRepMaxList.set(position,Integer.parseInt(text));
-                    //SetsFragment setsFragment= SetsFragment.newInstance(position,mOneRepMaxList);
-                    fragmentPageAdapter.replaceFragment(position, mOneRepMaxList);
-                    //DataManager.saveTabEditText(mOneRepMaxList);
-                    return true;
-                }
-                return false;
-            }
-        });
-
-
-        tabLayout.getTabAt(position).setCustomView(tabGroupView);
-
-
-
-    }
 
     @Override
     public Week getWeekInfo() {
@@ -457,26 +327,4 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     }
 
 
-
-    @Override
-    public void repopulateTabs(int position,ArrayList<Integer> oneRepMaxList) {
-        Log.v("Repop","repop");
-        View customView=tabLayout.getTabAt(position).getCustomView();
-        EditText editText= (EditText) customView.findViewById(R.id.weight_edit_text_view);
-        editText.setText(oneRepMaxList.get(position).toString());
-        String text = editText.getText().toString();
-        tabLayout.getTabAt(position).setCustomView(customView);
-
-        //tabLayout.removeAllTabs();
-//        updateTabLayout(position,oneRepMaxList);
-//        View rootViewCustomTab = getLayoutInflater().inflate(R.layout.custom_tab_item,null);
-//        TextView textView = (TextView) rootViewCustomTab.findViewById(R.id.type_of_exercise_text_view);
-//        EditText editText = (EditText) rootViewCustomTab.findViewById(R.id.weight_edit_text_view);
-//        textView.setText("Bench");
-//        editText.setText(oneRepMaxList.get(position).toString());
-//        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-//            TabLayout.Tab tab = tabLayout.getTabAt(i);
-//            tab.setCustomView(fragmentPageAdapter.getTabView(i,mOneRepMaxList));
-//        }
-    }
 }

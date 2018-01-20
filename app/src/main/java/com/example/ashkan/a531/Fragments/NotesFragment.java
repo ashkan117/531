@@ -1,6 +1,7 @@
 package com.example.ashkan.a531.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.ashkan.a531.Adapters.NotesViewPagerAdapter;
 import com.example.ashkan.a531.Data.DataManager;
@@ -60,11 +62,24 @@ public class NotesFragment extends DialogFragment {
             case R.id.save_note_menu_item:
                 //DataManager.saveNote(currentItem,dbHelper);
                 saveNoteAsPreference();
+                closeKeyBoard();
                 return true;
             default:
                 return false;
         }
 
+    }
+
+    public void closeKeyBoard()
+    {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = getActivity().getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(getContext());
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void saveNoteAsPreference() {
@@ -116,6 +131,7 @@ public class NotesFragment extends DialogFragment {
         mViewPager.setAdapter(mPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager,true);
         setUpNotesTab(images);
+        mTabLayout.bringToFront();
         mTabLayout.requestFocus();
         return rootView;
     }

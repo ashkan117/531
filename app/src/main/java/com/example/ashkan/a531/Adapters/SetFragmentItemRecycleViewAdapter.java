@@ -14,7 +14,7 @@ import com.example.ashkan.a531.R;
  */
 
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
+public class SetFragmentItemRecycleViewAdapter extends RecyclerView.Adapter<SetFragmentItemRecycleViewAdapter.CustomViewHolder> {
 
     private final Context mContext;
     private final LayoutInflater mLayoutInflater;
@@ -46,7 +46,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
         }
     }
 
-    public CustomAdapter(Context context, int positionOfPager, int weightLifted){
+    public SetFragmentItemRecycleViewAdapter(Context context, int positionOfPager, int weightLifted){
         mContext=context;
         mLayoutInflater=LayoutInflater.from(context);
         mPositionOfPager=positionOfPager;

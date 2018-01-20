@@ -127,4 +127,11 @@ public class DataManager {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
     }
+
+    public static void deleteWeek(int weekNumber, OneRepMaxDataBaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String where = OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER+" =? ";
+        String whereArgs[] = new String[]{String.valueOf(weekNumber)};
+        db.delete(OneRepMaxEntry.TABLE_NAME,where,whereArgs);
+    }
 }
