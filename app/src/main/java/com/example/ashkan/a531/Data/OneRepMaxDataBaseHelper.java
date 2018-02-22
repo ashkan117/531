@@ -12,7 +12,7 @@ public class OneRepMaxDataBaseHelper extends SQLiteOpenHelper {
 
     //simplifies constructor and might change so we use fields
     public static final String TABLE_NAME="oneRepMax.db";
-    public static final int DATABASE_VERSION=3;
+    public static final int DATABASE_VERSION=5;
 
     public OneRepMaxDataBaseHelper(Context context) {
         super(context, TABLE_NAME, null, DATABASE_VERSION);
@@ -21,11 +21,13 @@ public class OneRepMaxDataBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(ContractClass.OneRepMaxEntry.CREATE_TABLE);
+        db.execSQL(ContractClass.AlarmClockEntry.CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.delete(ContractClass.OneRepMaxEntry.TABLE_NAME,null,null);
+        db.delete(ContractClass.AlarmClockEntry.TABLE_NAME,null,null);
         onCreate(db);
     }
 }

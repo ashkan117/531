@@ -3,6 +3,8 @@ package com.example.ashkan.a531.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +16,6 @@ import android.widget.TextView;
 
 import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.R;
-import com.example.ashkan.a531.Util;
 
 import java.util.ArrayList;
 
@@ -22,7 +23,7 @@ import java.util.ArrayList;
  * Created by Ashkan on 12/29/2017.
  */
 
-public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleViewAdapter.GraphViewHolder> {
+public class TableRecycleViewAdapter extends RecyclerView.Adapter<TableRecycleViewAdapter.TableViewHolder> {
 
     private final Context mContext;
     private final LayoutInflater mInflater;
@@ -43,7 +44,7 @@ public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleVi
         void setBeenFocused();
     }
 
-    public GraphRecycleViewAdapter(Context context, ArrayList<Week> listOfWeeks, EditTextListener listener, Activity activity){
+    public TableRecycleViewAdapter(Context context, ArrayList<Week> listOfWeeks, EditTextListener listener, Activity activity){
         mActivity = activity;
         mContext =context;
         mInflater = LayoutInflater.from(context);
@@ -55,13 +56,13 @@ public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleVi
 
 
     @Override
-    public GraphViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TableViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = mInflater.inflate(R.layout.table_item,parent,false);
-        return new GraphViewHolder(rootView);
+        return new TableViewHolder(rootView);
     }
 
     @Override
-    public void onBindViewHolder(GraphViewHolder holder, int position) {
+    public void onBindViewHolder(TableViewHolder holder, int position) {
         //TODO: a possibly new list to handle updates
         //OR WE should be continuously updating the currentWeek with postition
         Week currentWeek = mListOfWeeks.get(position);
@@ -72,11 +73,62 @@ public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleVi
         holder.ohpMaxEditView.setText(String.valueOf(currentWeek.getOhp()));
         if(!holder.benchPressMaxEditView.getText().toString().equals("TextView"))
         {
+            initTextChangedListeners(holder,currentWeek,position);
             initFocusListeners(holder,currentWeek, position);
         }
     }
 
-    private void initFocusListeners(final GraphViewHolder holder, final Week week, int position) {
+    private void initTextChangedListeners(final TableViewHolder holder, final Week currentWeek, int position) {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.toString().equals("")){
+                    return;
+                }
+                String text = s.toString();
+                int weightInput = Integer.parseInt(text);
+                updateWeek(holder,weightInput,currentWeek);
+                updateList(currentWeek);
+                mListener.updateWeek(currentWeek);
+            }
+        };
+        holder.benchPressMaxEditView.addTextChangedListener(textWatcher);
+        holder.squatMaxEditView.addTextChangedListener(textWatcher);
+        holder.deadliftMaxEditView.addTextChangedListener(textWatcher);
+        holder.ohpMaxEditView.addTextChangedListener(textWatcher);
+    }
+
+    private void updateWeek(TableViewHolder holder, int weightInput, Week currentWeek) {
+        String weight = String.valueOf(weightInput);
+        String benchPressText = holder.benchPressMaxEditView.getText().toString();
+        String squatText = holder.squatMaxEditView.getText().toString();
+        String deadliftText = holder.deadliftMaxEditView.getText().toString();
+        String ohpText = holder.ohpMaxEditView.getText().toString();
+        if(holder.benchPressMaxEditView.getText().toString().equals(weight)){
+            currentWeek.setBenchPress(weightInput);
+        }
+        if(holder.squatMaxEditView.getText().toString().equals(weight)){
+            currentWeek.setSquat(weightInput);
+        }
+        if(holder.deadliftMaxEditView.getText().toString().equals(weight)){
+            currentWeek.setDeadlift(weightInput);
+        }
+        if(holder.ohpMaxEditView.getText().toString().equals(weight)){
+            currentWeek.setOhp(weightInput);
+        }
+    }
+
+    private void initFocusListeners(final TableViewHolder holder, final Week week, int position) {
         holder.benchPressMaxEditView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -159,7 +211,7 @@ public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleVi
         return mListOfWeeks.size();
     }
 
-    public class GraphViewHolder extends RecyclerView.ViewHolder{
+    public class TableViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView weekNumberTextView;
         private final EditText benchPressMaxEditView;
@@ -167,7 +219,8 @@ public class GraphRecycleViewAdapter extends RecyclerView.Adapter<GraphRecycleVi
         private final EditText deadliftMaxEditView;
         private final EditText ohpMaxEditView;
 
-        public GraphViewHolder(View itemView) {
+
+        public TableViewHolder(View itemView) {
             super(itemView);
             weekNumberTextView = (TextView) itemView.findViewById(R.id.week_number_text_view);
             benchPressMaxEditView = (EditText) itemView.findViewById(R.id.bench_press_max_edit_text_view);

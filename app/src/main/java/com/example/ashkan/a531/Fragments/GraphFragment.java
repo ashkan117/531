@@ -1,7 +1,10 @@
 package com.example.ashkan.a531.Fragments;
 
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -15,8 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.ashkan.a531.Adapters.GraphRecycleViewAdapter;
+import com.example.ashkan.a531.Adapters.TableRecycleViewAdapter;
+import com.example.ashkan.a531.Data.ContractClass;
 import com.example.ashkan.a531.Data.DataManager;
+import com.example.ashkan.a531.Data.OneRepMaxContentProvider;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.R;
@@ -29,7 +34,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static com.example.ashkan.a531.Data.DataManager.getListOfWeeks;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.BENCH_PRESS;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.DEADLIFT;
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.OHP;
@@ -53,7 +57,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     private Random mRand = new Random();
     private RecyclerView mRecyclerView;
     private ArrayList<Week> mListOfWeeks;
-    private GraphRecycleViewAdapter recycleViewAdapter;
+    private TableRecycleViewAdapter recycleViewAdapter;
     private SQLiteDatabase db;
     private Button insertWeekButton;
     private GetWeekInformationFromSetFragment informationFromSetFragmentListener;
@@ -64,6 +68,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     private LineGraphSeries<DataPointInterface> deadLiftSeries;
     private LineGraphSeries<DataPointInterface> ohpSeries;
     private ArrayList<Week> allExercisesList;
+    private ContentResolver mContentResolver;
 
     public GraphFragment() {
         // Required empty public constructor
@@ -89,8 +94,9 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        helperDatabase = new OneRepMaxDataBaseHelper(getContext());
-         db = helperDatabase.getReadableDatabase();
+        mContentResolver = getContext().getContentResolver();
+        //helperDatabase = new OneRepMaxDataBaseHelper(getContext());
+//         db = helperDatabase.getReadableDatabase();
     }
 
     @Override
@@ -133,7 +139,10 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
                 customDialog.show(getFragmentManager(),"CustomDialog");
             }
         });
-        mListOfWeeks = getListOfWeeks(helperDatabase);
+//        //mListOfWeeks = getListOfWeeks(helperDatabase);
+//        Cursor listOfCursors = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null);
+//        mListOfWeeks = DataManager.listOfWeeksFromCursor(listOfCursors);
+        getWeeksFromDatabase();
         mWeekNumberEditText =(EditText) viewGroup.findViewById(R.id.week_number_insert_edit_text);
         insertWeekButton = (Button) viewGroup.findViewById(R.id.insert_week_button);
         insertWeekButton.setOnClickListener(new View.OnClickListener() {
@@ -141,7 +150,9 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
             public void onClick(View v) {
                 mWeekToInsert=informationFromSetFragmentListener.getWeekInfo();
                 mWeekToInsert.setWeekNumber(Integer.parseInt(mWeekNumberEditText.getText().toString()));
-                DataManager.addOneRepMax(mWeekToInsert,helperDatabase);
+                ContentValues values = DataManager.contentValuesFromWeek(mWeekToInsert);
+                mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
+                //DataManager.addOneRepMax(mWeekToInsert,helperDatabase);
                 updateGraph();
             }
         });
@@ -153,8 +164,16 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         ohpSeries = new LineGraphSeries<>();
     }
 
+    private void getWeeksFromDatabase() {
+
+        Cursor listOfCursors = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null);
+        mListOfWeeks = DataManager.listOfWeeksFromCursor(listOfCursors);
+    }
+
     private void loadDataPoints() {
-        allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+        //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+        Cursor listOfWeeksCursor = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null,null);
+        allExercisesList = DataManager.listOfWeeksFromCursor(listOfWeeksCursor);
         //Must sort DataPoints in asc order
         sortInASC(allExercisesList);
         //extracts the specific exercise from the total list into an array list of data points
@@ -294,13 +313,13 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         int count = mListOfWeeks.size();
         int maxX = mListOfWeeks.get(count-1).getWeekNumber();
         graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMaxY(maxY+maxY*.1);
+        graph.getViewport().setMaxY(maxY+(maxY*.6));
         graph.getViewport().setMinY(0);
 
         //set manual x bounds
         graph.getViewport().setXAxisBoundsManual(true);
         //so that points are not at edge
-        graph.getViewport().setMaxX(maxX+maxX*.1);
+        graph.getViewport().setMaxX(maxX+(maxX*.3));
         graph.getViewport().setMinX(0);
 
 
@@ -359,12 +378,18 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
         Week week = new Week(mWeekNumber,-1,-1,-1,-1);
         week.setExercise(mExerciseType,mOneRepMax,this);
+        ContentValues values = DataManager.contentValuesFromWeek(week);
         if(weekExists())
         {
-            DataManager.updateExerciseEntry(week,helperDatabase);
+            String where = ContractClass.OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER;
+            String[] whereArgs = new String[]{String.valueOf(week.getWeekNumber())};
+            mContentResolver.update(ContractClass.OneRepMaxEntry.CONTENT_URI,values,where,whereArgs);
+            //DataManager.updateExerciseEntry(week,helperDatabase);
+
         }
         else{
-            DataManager.addOneRepMax(week,helperDatabase);
+            //DataManager.addOneRepMax(week,helperDatabase);
+            mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
         }
 
         updateListAndSort(mExerciseType);
@@ -376,7 +401,10 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         //graph.removeAllSeries();
         //this removes all the series but we want to update them not remove
         //  removing means we need to reattach series to graph
-        allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+        //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+
+        Cursor listOfCursors = mContentResolver.query(ContractClass.AlarmClockEntry.CONTENT_URI,null,null,null,null);
+        allExercisesList = DataManager.listOfWeeksFromCursor(listOfCursors);
         //Must sort DataPoints in asc order
         sortInASC(allExercisesList);
         //extracts the specific exercise from the total list into an array list of data points
@@ -396,7 +424,10 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     }
 
     private void updateListAndSort(String exercise) {
-        allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+        //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
+
+        Cursor listOfCursors = mContentResolver.query(ContractClass.AlarmClockEntry.CONTENT_URI,null,null,null,null);
+        allExercisesList = DataManager.listOfWeeksFromCursor(listOfCursors);
         sortInASC(allExercisesList);
         DataPoint[] dataPointArray = new DataPoint[allExercisesList.size()];
         switch (exercise){
@@ -424,7 +455,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         Week week = new Week();
         week.setExercise(mExerciseType,mOneRepMax,this);
         week.setWeekNumber(mWeekNumber);
-        return DataManager.weekExists(week,helperDatabase);
+        return OneRepMaxContentProvider.weekExists(week,helperDatabase);
     }
 
 }

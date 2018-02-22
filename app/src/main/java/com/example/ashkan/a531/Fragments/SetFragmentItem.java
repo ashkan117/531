@@ -1,13 +1,14 @@
 package com.example.ashkan.a531.Fragments;
 
 
-import android.content.Context;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import com.example.ashkan.a531.Adapters.SetFragmentItemRecycleViewAdapter;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
+
+import static java.lang.Math.floor;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -103,10 +106,33 @@ public class SetFragmentItem extends android.support.v4.app.Fragment {
             mPositionOfPager = getArguments().getInt(POSITION_OF_PAGER_KEY, 0);
             mWeightLifted = getArguments().getInt(WEIGHT_LIFTED, 99);
         }
+        poundsOrKilogramsPreference();
         initViews(rootView);
         setUpWhichExercise();
         setUpRecyclerView();
         return rootView;
+    }
+
+
+    private void poundsOrKilogramsPreference() {
+        //This one acesses the sttings sharedpreference vs one we'd make
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String key = getResources().getString(R.string.preference_key_pounds_kilogram);
+        String value = sharedPreferences.getString(key,"Pounds");
+        if(value.equals("Kilogram")){
+            //convertToKiloGrams();
+        }
+    }
+
+    private void convertToKiloGrams() {
+        //2.20462ib = 1kg
+        //1ib = 0.453592kg
+        for(int i=0;i<mOneRepMaxList.size();i++){
+            int pounds = mOneRepMaxList.get(i);
+            int kilogram = (int) floor(pounds*0.453592);
+            mOneRepMaxList.set(i,kilogram);
+        }
+        mWeightLifted *= 0.453592;
     }
 
     private void setUpWhichExercise() {

@@ -3,9 +3,6 @@ package com.example.ashkan.a531.Data;
 import com.example.ashkan.a531.Fragments.GraphFragment;
 import com.example.ashkan.a531.R;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 /**
  * Created by Ashkan on 12/29/2017.
  */
@@ -17,6 +14,7 @@ public class Week {
     private int mSquat;
     private int mDeadlift;
     private int mOhp;
+    private long mId;
 
     public Week(){}
 
@@ -83,5 +81,13 @@ public class Week {
             this.setOhp(mOneRepMax);
         }
         return;
+    }
+
+    public void setId(long id) {
+        mId = id;
+    }
+
+    public long getId() {
+        return mId;
     }
 }

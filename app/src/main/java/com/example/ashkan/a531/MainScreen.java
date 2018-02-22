@@ -1,32 +1,32 @@
 package com.example.ashkan.a531;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
+import com.example.ashkan.a531.Activity.AlarmClockActivity;
+import com.example.ashkan.a531.Activity.SettingsActivity;
 import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
+import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.Data.Week;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
@@ -40,7 +40,8 @@ import java.util.ArrayList;
 
 public class MainScreen extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         CustomViewPagerAdapter.OnTextChangedListener,
-        GraphFragment.GetWeekInformationFromSetFragment{
+        GraphFragment.GetWeekInformationFromSetFragment ,
+        SetsFragment.SetsFragmentEndingListener{
 
     private static final String BENCH_PRESS_PREFERENCE = "benchPressPreference";
     private static final String SQUAT_PREFERENCE = "sqautPreference";
@@ -57,6 +58,20 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     OneRepMaxDataBaseHelper dbHelper = new OneRepMaxDataBaseHelper(this);
     private EditText oneRepMaxEditText;
     private String PREFS_NAME="MainScreenSharedPrefs";
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        emptyFragmentIfExists();
+    }
+
+    private void emptyFragmentIfExists() {
+        Fragment currentFragment = mFragmentManager.findFragmentById(R.id.other_fragments);
+        if(currentFragment!=null){
+            mFragmentManager.beginTransaction().remove(currentFragment);
+        }
+    }
+
     private ConstraintLayout tabAndViewPagerLayout;
     private int navMenuIndex = 0;
     private TabLayout navTabLayout;
@@ -72,6 +87,8 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private String NOTES_FRAGMENT_TAG="notesFragment";
     private String SETS_FRAGMENT_TAG;
     private String TABLE_FRAGMENT_TAG;
+    private DataManager mDataManager;
+    private ContentResolver mContectResolver;
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
@@ -79,15 +96,21 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         outState.putIntegerArrayList(ONE_REP_MAX_LIST,mOneRepMaxList);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //TODO:         android:fitsSystemWindows="false"  fixes navigation being cut off
         Log.v("MainScreen","Created");
         super.onCreate(savedInstanceState);
+
+        mDataManager = DataManager.getInstance();
+
         setContentView(R.layout.activity_main_screen);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         mFragmentManager = getSupportFragmentManager();
+        emptyFragmentIfExists();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mOneRepMaxList = new ArrayList<>();
 
@@ -103,9 +126,13 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         navigationView.setNavigationItemSelectedListener(this);
 
         init();
+        //Only add the fragment if its empty
+        Fragment fragment = mFragmentManager.findFragmentById(R.id.other_fragments);
+        if(fragment==null){
+            mFragmentTransaction.add(R.id.other_fragments,new SetsFragment(),SETS_FRAGMENT_TAG)
+                    .commit();
+        }
 
-        mFragmentTransaction.add(R.id.other_fragments,new SetsFragment(),SETS_FRAGMENT_TAG)
-            .commit();
 
     }
 
@@ -215,8 +242,14 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.sets_action_notifications) {
+            Intent intent = new Intent(this,AlarmClockActivity.class);
+            startActivity(intent);
             return true;
+        }
+        else if(id == R.id.sets_action_settings){
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(intent);
         }
         else if(id==R.id.weight_help_setting){
             WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
@@ -296,9 +329,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         return new int[]{};
     }
 
-
-
-    /*
+/*
     * ReplaceFragment calls this method to allow us to update the tablayout to the newly entered numbers
     * Otherwise the page goes blank
     */
@@ -313,6 +344,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         editor.putInt(DEADLIFT_PREFERENCE,mOneRepMaxList.get(2));
         editor.putInt(OHP_PREFERENCE,mOneRepMaxList.get(3));
         editor.commit();
+        emptyFragmentIfExists();
     }
 
 
@@ -327,4 +359,13 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     }
 
 
+    @Override
+    public void removeFragmentFromMainScreen() {
+        Fragment setsFragment = mFragmentManager.findFragmentById(R.id.other_fragments);
+        if(setsFragment instanceof SetsFragment){
+            mFragmentTransaction = mFragmentManager.beginTransaction().remove(setsFragment);
+            mFragmentTransaction.commit();
+        }
+
+    }
 }

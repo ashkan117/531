@@ -9,30 +9,23 @@
         android:layout_marginLeft="64dp"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_gravity="right"
         android:layout_weight="1">
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_marginLeft="32dp"
+        style="@style/GridLayoutTextView"
+        android:layout_marginLeft="24dp"
         android:text="Bench Press" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        style="@style/GridLayoutTextView"
         android:text="Squat" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        style="@style/GridLayoutTextView"
         android:text="Deadlift" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        style="@style/GridLayoutTextView"
         android:text="Overhead Press" />
 </LinearLayout>
     <FrameLayout
@@ -41,7 +34,7 @@
         android:layout_weight="9">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/graph_recycler_view"
+            android:id="@+id/table_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:listitem="@layout/table_item"></android.support.v7.widget.RecyclerView>
@@ -53,5 +46,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Update" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_table_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_add_black_24dp"/>
 
 </LinearLayout>

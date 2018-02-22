@@ -6,4 +6,12 @@
         android:id="@+id/weight_help_setting"
         android:title="Weight to put"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/sets_action_notifications"
+        android:title="@string/notifications"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sets_action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 </menu>

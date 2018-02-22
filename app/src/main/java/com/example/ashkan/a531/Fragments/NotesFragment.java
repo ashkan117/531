@@ -2,11 +2,11 @@ package com.example.ashkan.a531.Fragments;
 
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -21,14 +21,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.example.ashkan.a531.Adapters.NotesViewPagerAdapter;
-import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
-import java.util.Set;
-
-import static android.R.id.list;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -93,6 +89,32 @@ public class NotesFragment extends DialogFragment {
         editor.commit();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveAllNotes();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        saveAllNotes();
+    }
+
+    private void saveAllNotes() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(NOTES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for(int i=0;i<mPagerAdapter.getCount();i++){
+//            mViewPager.setCurrentItem(i,false);
+            NoteItemFragment noteItemFragment = (NoteItemFragment) mPagerAdapter.getItem(i);
+            if(noteItemFragment.getNote()!=null){
+                String note = noteItemFragment.getNote();
+                editor.putString(NOTES_ID+i,note);
+            }
+        }
+        //Don't forget to commit
+        editor.commit();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,9 +132,35 @@ public class NotesFragment extends DialogFragment {
 
         Drawable[] images = getNotesDrawableImages();
         mPagerAdapter = new NotesViewPagerAdapter(manager);
+
+        ArrayList<String> stringArrayList = reloadSharedPreferenceNotes();
+        createFragmentsForViewPager(stringArrayList);
+
+        mViewPager.setAdapter(mPagerAdapter);
+        mTabLayout.setupWithViewPager(mViewPager,true);
+
+        setUpNotesTab(images);
+        mTabLayout.bringToFront();
+        mTabLayout.requestFocus();
+       return rootView;
+    }
+
+    private void createFragmentsForViewPager(ArrayList<String> stringArrayList) {
+        String item1 = stringArrayList.get(0);
+        String item2 = stringArrayList.get(1);
+        String item3 = stringArrayList.get(2);
+        String item4 = stringArrayList.get(3);
+
+        mPagerAdapter.addFragment(0,NoteItemFragment.newInstance(item1));
+        mPagerAdapter.addFragment(1,NoteItemFragment.newInstance(item2));
+        mPagerAdapter.addFragment(2,NoteItemFragment.newInstance(item3));
+        mPagerAdapter.addFragment(3,NoteItemFragment.newInstance(item4));
+    }
+
+    private ArrayList<String> reloadSharedPreferenceNotes() {
+        ArrayList<String> stringArrayList = new ArrayList<>();
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(NOTES_SHARED_PREFERENCES,Context.MODE_PRIVATE);
         //only need editor if we're changing sharedPrefs
-        ArrayList<String> stringArrayList = new ArrayList<>();
         String note;
         Bundle debug = getArguments();
         int count = mPagerAdapter.getCount();
@@ -120,20 +168,7 @@ public class NotesFragment extends DialogFragment {
             note = sharedPreferences.getString(NOTES_ID +i,"");
             stringArrayList.add(note);
         }
-        String item1 = stringArrayList.get(0);
-        String item2 = stringArrayList.get(1);
-        String item3 = stringArrayList.get(2);
-        String item4 = stringArrayList.get(3);
-        mPagerAdapter.addFragment(0,NoteItemFragment.newInstance(item1));
-        mPagerAdapter.addFragment(1,NoteItemFragment.newInstance(item2));
-        mPagerAdapter.addFragment(2,NoteItemFragment.newInstance(item3));
-        mPagerAdapter.addFragment(3,NoteItemFragment.newInstance(item4));
-        mViewPager.setAdapter(mPagerAdapter);
-        mTabLayout.setupWithViewPager(mViewPager,true);
-        setUpNotesTab(images);
-        mTabLayout.bringToFront();
-        mTabLayout.requestFocus();
-        return rootView;
+        return stringArrayList;
     }
 
     private void setUpNotesTab(Drawable[] images) {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                    android:id="@+id/alarm_clock_card"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include layout="@layout/alarm_time"></include>
+
+        <LinearLayout
+            android:id="@+id/days"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ToggleButton
+                android:id="@+id/day0"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:id="@+id/day1"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:background="@drawable/ic_dehaze_black_24dp"
+                android:id="@+id/day2"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:id="@+id/day3"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:id="@+id/day4"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:id="@+id/day5"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+            <ToggleButton
+                android:id="@+id/day6"
+                android:background="@drawable/ic_dehaze_black_24dp"
+                style="@style/AlarmDayToggle"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dismiss_alarm_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/dismiss_alarm_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dismiss Alarm"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

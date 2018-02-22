@@ -1,19 +1,14 @@
 package com.example.ashkan.a531.Fragments;
 
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.example.ashkan.a531.R;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,7 +48,10 @@ public class NoteItemFragment extends android.support.v4.app.Fragment {
 
 
     public String getNote() {
-        return mNoteEditText.getText().toString();
+        if(mNoteEditText!=null){
+            return mNoteEditText.getText().toString();
+        }
+        return null;
     }
 
     public void setNote(String note) {

@@ -2,7 +2,9 @@ package com.example.ashkan.a531.Fragments;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,6 +27,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.ashkan.a531.Activity.AlarmClockActivity;
+import com.example.ashkan.a531.Activity.SettingsActivity;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
 import com.example.ashkan.a531.R;
 
@@ -55,7 +59,13 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
     private SetFragmentPageAdapter mFragmentPagerAdapter;
     private FragmentActivity mActivity;
     private ArrayList<ConstraintLayout> listOfLayouts = new ArrayList<>();
+    private ContentResolver mContectResolver;
+    private SetsFragmentEndingListener mActivityListener;
 
+
+    public interface SetsFragmentEndingListener{
+        void removeFragmentFromMainScreen();
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +77,16 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         mActivity = getActivity();
     }
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            mActivityListener = (SetsFragmentEndingListener) context;
+        }catch (ClassCastException e){
+            Log.v("SetsFragment", "Activity did not implement SetsFragmentEndingListener");
+        }
+    }
 
     @Override
     public void onPause() {
@@ -85,6 +105,7 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         editor.putInt(DEADLIFT_PREFERENCE,mOneRepMaxList.get(2));
         editor.putInt(OHP_PREFERENCE,mOneRepMaxList.get(3));
         editor.commit();
+        //mActivityListener.removeFragmentFromMainScreen();
     }
 
     @Override
@@ -261,6 +282,13 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
                 WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
                 FragmentManager manager = ((AppCompatActivity)mContext).getFragmentManager();
                 dialogFragment.show(manager,"weightHelperDialogFragment");
+                return true;
+            case R.id.sets_action_notifications:
+                Intent intent = new Intent(getContext(), AlarmClockActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.sets_action_settings:
+                startActivity(new Intent(getContext(), SettingsActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
