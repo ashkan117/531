@@ -7,6 +7,12 @@
         android:title="Weight to put"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/timer_setting"
+        android:title=""
+        android:icon="@drawable/clock_helper_setting"
+        app:showAsAction="always"
+        />
+    <item
         android:id="@+id/sets_action_notifications"
         android:title="@string/notifications"
         app:showAsAction="never" />

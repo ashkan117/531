@@ -9,7 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 
-import com.example.ashkan.a531.Fragments.SetsFragment;
+import com.example.ashkan.a531.Activity.MainScreen;
 
 import org.hamcrest.Matcher;
 import org.junit.Before;
@@ -17,14 +17,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static android.R.attr.id;
-import static android.R.attr.text;
-import static android.support.test.espresso.Espresso.*;
-import static android.support.test.espresso.ViewAction.*;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.*;
-import static android.support.test.espresso.action.ViewActions.*;
-import static org.hamcrest.Matchers.*;
+import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.allOf;
 /**
  * Created by Ashkan on 1/17/2018.
  */
@@ -44,7 +45,7 @@ public class CustomTabLayoutTest {
 
     @Test
     public void checkTabLayoutDisplayed() {
-        onView(withId(R.id.nav_tab_layout))
+        onView(withId(R.id.bottom_navigation_view))
                 .perform(click())
                 .check(matches(isDisplayed()));
         ViewInteraction appCompatTextView = onView(

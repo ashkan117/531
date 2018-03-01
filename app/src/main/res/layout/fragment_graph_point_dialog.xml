@@ -1,12 +1,32 @@
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:rowCount="3"
-    android:columnCount="2"
-    tools:context="com.example.ashkan.a531.Fragments.GraphPointDialogFragment">
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:rowCount="4"
+            android:columnCount="2"
+            tools:context="com.example.ashkan.a531.Fragments.GraphPointDialogFragment">
 
+
+    <EditText
+        android:id="@+id/week_number_insert_edit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:hint="week number"/>
+
+    <Button
+        android:id="@+id/insert_week_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="20"
+        android:text="save entire week"
+        android:textAlignment="center"/>
 
     <TextView
         android:id="@+id/textView5"
@@ -23,12 +43,13 @@
         android:id="@+id/week_number_edit_text"
         android:layout_width="88dp"
         android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="center"
+        android:layout_rowWeight="5"
         android:imeOptions="actionDone"
         android:inputType="number"
-        android:layout_gravity="center"
-        android:layout_columnWeight="1"
-        android:layout_rowWeight="5"
-        tools:text="12" />
+        android:textAlignment="center"
+        tools:text="12"/>
 
     <TextView
         android:id="@+id/textView4"
@@ -61,12 +82,14 @@
         android:id="@+id/one_rep_max_week_edit_text"
         android:layout_width="88dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_columnWeight="1"
+        android:layout_gravity="center"
         android:layout_rowWeight="1"
         android:imeOptions="actionDone"
         android:inputType="number"
-        tools:text="164" />
+        android:textAlignment="center"
+        tools:text="164"/>
+
 
     <Button
         android:id="@+id/ok_button"

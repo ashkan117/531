@@ -1,4 +1,4 @@
-package com.example.ashkan.a531.Data;
+package com.example.ashkan.a531.Model;
 
 /**
  * Created by Ashkan on 1/9/2018.

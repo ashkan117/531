@@ -23,7 +23,7 @@ import com.example.ashkan.a531.Data.ContractClass;
 import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxContentProvider;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
-import com.example.ashkan.a531.Data.Week;
+import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
@@ -44,7 +44,8 @@ import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.SQUAT;
  * A simple {@link Fragment} subclass.
  */
 public class GraphFragment extends android.support.v4.app.Fragment implements GraphPointDialogFragment.DialogListener
-        ,TableFragment.UpdateGraphListener{
+        ,TableFragment.UpdateGraphListener
+        ,GraphPointDialogFragment.UpdateGraphFragmentListener{
 
 
     private FloatingActionButton fab;
@@ -60,7 +61,6 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     private TableRecycleViewAdapter recycleViewAdapter;
     private SQLiteDatabase db;
     private Button insertWeekButton;
-    private GetWeekInformationFromSetFragment informationFromSetFragmentListener;
     private Week mWeekToInsert;
     private OneRepMaxDataBaseHelper helperDatabase;
     private EditText mWeekNumberEditText;
@@ -85,10 +85,6 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         SQUAT,
         DEADLIFT,
         OHP
-    }
-
-    public interface GetWeekInformationFromSetFragment{
-        Week getWeekInfo();
     }
 
     @Override
@@ -126,10 +122,10 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
     private void initViews(View viewGroup) {
         mContext =getContext();
-        informationFromSetFragmentListener = (GetWeekInformationFromSetFragment) mContext;
+        //informationFromSetFragmentListener = (GetWeekInformationFromSetFragment) mContext;
 
 
-        fab = (FloatingActionButton) viewGroup.findViewById(R.id.fab);
+        fab = (FloatingActionButton) viewGroup.findViewById(R.id.graph_fragment_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,19 +139,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 //        Cursor listOfCursors = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null);
 //        mListOfWeeks = DataManager.listOfWeeksFromCursor(listOfCursors);
         getWeeksFromDatabase();
-        mWeekNumberEditText =(EditText) viewGroup.findViewById(R.id.week_number_insert_edit_text);
-        insertWeekButton = (Button) viewGroup.findViewById(R.id.insert_week_button);
-        insertWeekButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mWeekToInsert=informationFromSetFragmentListener.getWeekInfo();
-                mWeekToInsert.setWeekNumber(Integer.parseInt(mWeekNumberEditText.getText().toString()));
-                ContentValues values = DataManager.contentValuesFromWeek(mWeekToInsert);
-                mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
-                //DataManager.addOneRepMax(mWeekToInsert,helperDatabase);
-                updateGraph();
-            }
-        });
+
         graph = (GraphView) viewGroup.findViewById(R.id.graph);
 
         benchSeries = new LineGraphSeries<>();
@@ -297,6 +281,15 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
         graph.setTitle("Progress");
 
+
+        graph.getGridLabelRenderer().setHumanRounding(true);
+
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Week");
+        graph.getGridLabelRenderer().setHorizontalAxisTitleTextSize(36);
+        graph.getGridLabelRenderer().setLabelHorizontalHeight(88);
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Ib/Kgs");
+        graph.getGridLabelRenderer().setVerticalAxisTitleTextSize(36);
+
         graph.getLegendRenderer().setVisible(true);
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
@@ -319,7 +312,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         //set manual x bounds
         graph.getViewport().setXAxisBoundsManual(true);
         //so that points are not at edge
-        graph.getViewport().setMaxX(maxX+(maxX*.3));
+        graph.getViewport().setMaxX(maxX+(maxX*.5));
         graph.getViewport().setMinX(0);
 
 
@@ -360,16 +353,14 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         // activate vertical scrolling
         graph.getViewport().setScrollableY(true);
 
-        graph.getViewport().setMaxX(5);
-        graph.getViewport().setMinX(0);
     }
 
 
     @Override
     public void returnInformationFromDialogToActivity(int weekNumber, String exerciseType, int oneRepMax) {
-        mWeekNumber =weekNumber;
-        mExerciseType =exerciseType;
-        mOneRepMax =oneRepMax;
+        mWeekNumber = weekNumber;
+        mExerciseType = exerciseType;
+        mOneRepMax = oneRepMax;
         addDataPoint();
     }
 
@@ -396,8 +387,8 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         //updateGraph();
 
     }
-
-    private void updateGraph() {
+    @Override
+    public void updateGraph() {
         //graph.removeAllSeries();
         //this removes all the series but we want to update them not remove
         //  removing means we need to reattach series to graph

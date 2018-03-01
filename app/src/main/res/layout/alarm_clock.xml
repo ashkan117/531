@@ -6,7 +6,8 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
 
         <include layout="@layout/alarm_time"></include>
 
@@ -18,37 +19,37 @@
 
             <ToggleButton
                 android:id="@+id/day0"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/monday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
                 android:id="@+id/day1"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/tuesday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/wednesday_alarm_letter"
                 android:id="@+id/day2"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
                 android:id="@+id/day3"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/tuesday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
                 android:id="@+id/day4"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/friday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
                 android:id="@+id/day5"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/saturday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
             <ToggleButton
                 android:id="@+id/day6"
-                android:background="@drawable/ic_dehaze_black_24dp"
+                android:background="@mipmap/saturday_alarm_letter"
                 style="@style/AlarmDayToggle"/>
 
         </LinearLayout>

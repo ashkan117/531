@@ -28,7 +28,7 @@ import com.example.ashkan.a531.Activity.AlarmClockActivity;
 import com.example.ashkan.a531.Adapters.TableRecycleViewAdapter;
 import com.example.ashkan.a531.Data.ContractClass;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
-import com.example.ashkan.a531.Data.Week;
+import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;

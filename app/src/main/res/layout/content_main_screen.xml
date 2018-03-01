@@ -7,76 +7,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.ashkan.a531.MainScreen"
+    tools:context="com.example.ashkan.a531.Activity.MainScreen"
     tools:showIn="@layout/app_bar_main_screen">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/nav_tab_layout"
-        android:layout_width="0dp"
-        android:layout_height="88dp"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:tabGravity="fill"
-        app:tabMode="fixed">
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/workout_nav_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_fitness_center_black_24dp"
-            android:text="Workout" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/calculator_nav_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_keyboard_black_24dp"
-            android:text="Calculator" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/notes_nav_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_assignment_black_24dp"
-            android:text="Notes" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/progress_press_nav_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_trending_up_black_24dp"
-            android:text="Progress" />
-    </android.support.design.widget.TabLayout>
-
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:id="@+id/main_container"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/nav_tab_layout"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent">
-
-    </android.support.constraint.ConstraintLayout>
-
+-->
+    <!-- Makes the height the same size as the standard actionbar size
+                The tabs we add through a menu xml
+         -->
     <FrameLayout
-        android:id="@+id/other_fragments"
+        android:id="@+id/main_screen_fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/nav_tab_layout"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"></FrameLayout>
+<!-- Adds a divider between framelayout and bottom navigation -->
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#c0c0c0"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
+        android:id="@+id/bottom_navigation_view"
+        android:layout_width="368dp"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentBottom = "true"
+        app:menu="@menu/bottom_navigation_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_screen_fragment_container"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>
 

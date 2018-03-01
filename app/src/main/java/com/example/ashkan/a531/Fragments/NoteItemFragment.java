@@ -3,6 +3,7 @@ package com.example.ashkan.a531.Fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ public class NoteItemFragment extends android.support.v4.app.Fragment {
     private static String NOTE_STRING="noteString";
     private String note;
     private EditText mNoteEditText;
+    private String mSavedNote;
 
     public NoteItemFragment() {
         // Required empty public constructor
@@ -34,15 +36,32 @@ public class NoteItemFragment extends android.support.v4.app.Fragment {
 
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(getArguments()!=null){
+            mSavedNote = getArguments().getString(NOTE_STRING);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getArguments()!=null){
+            mSavedNote = getArguments().getString(NOTE_STRING);
+            mNoteEditText.setText(mSavedNote);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView= inflater.inflate(R.layout.fragment_note_item, container, false);
         mNoteEditText = (EditText) rootView.findViewById(R.id.note_item_edit_text);
         if(getArguments()!=null){
-            String savedNote = getArguments().getString(NOTE_STRING);
-            mNoteEditText.setText(savedNote);
+            mSavedNote = getArguments().getString(NOTE_STRING);
         }
+        mNoteEditText.setText(mSavedNote);
         return rootView;
     }
 

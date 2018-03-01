@@ -1,18 +1,19 @@
 package com.example.ashkan.a531.Fragments;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.provider.AlarmClock;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,22 +31,22 @@ import android.widget.TextView;
 import com.example.ashkan.a531.Activity.AlarmClockActivity;
 import com.example.ashkan.a531.Activity.SettingsActivity;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
+import com.example.ashkan.a531.Interface.IMainScreen;
+import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ashkan on 12/19/2017.
  */
 
-public class SetsFragment extends android.support.v4.app.Fragment implements SetFragmentPageAdapter.UpdateTabLayoutListener {
+public class SetsFragment extends android.support.v4.app.Fragment implements SetFragmentPageAdapter.UpdateTabLayoutListener
+        ,IMainScreen{
 
     public static final String ONE_REP_MAX_LIST = "ONE_REP_MAX_LIST";
-    private static final String BENCH_PRESS_PREFERENCE = "benchPressPreference";
-    private static final String PREFS_NAME = "settingsPreference";
-    private String SQUAT_PREFERENCE = "squatPreference";
-    private String DEADLIFT_PREFERENCE="deadliftPreference";
-    private String OHP_PREFERENCE="ohpPreference";
+
     private static String POSITION_OF_PAGER_KEY = "POSITION_OF_PAGER_KEY";
     private static String WEIGHT_LIFTED= "weightLifted";;
     private static ArrayList<Integer> mOneRepMaxList= new ArrayList<>();
@@ -58,11 +59,29 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
     private ViewPager mFragmentViewPager;
     private SetFragmentPageAdapter mFragmentPagerAdapter;
     private FragmentActivity mActivity;
-    private ArrayList<ConstraintLayout> listOfLayouts = new ArrayList<>();
+    private ArrayList<ConstraintLayout> mListOfTabItems;
     private ContentResolver mContectResolver;
     private SetsFragmentEndingListener mActivityListener;
 
+    @Override
+    public Week getCurrentWeekFromSetFragment() {
+        Week week = new Week();
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.SETS_FRAGMENT_SHARED_PREFERENCE),Context.MODE_PRIVATE);
+        int benchPress = sharedPreferences.getInt(getString(R.string.BENCH_PRESS_PREFERENCE),-1);
+        int squat = sharedPreferences.getInt(getString(R.string.SQUAT_PREFERENCE),-1);
+        int deadlift = sharedPreferences.getInt(getString(R.string.DEADLIFT_PREFERENCE),-1);
+        int ohp = sharedPreferences.getInt(getString(R.string.OHP_PREFERENCE),-1);
+        week.setBenchPress(benchPress);
+        week.setSquat(squat);
+        week.setDeadlift(deadlift);
+        week.setOhp(ohp);
+        return week;
+    }
 
+
+    public interface SendingMainScreenWeekInformation{
+        public void sendWeekInformationToMainScreen(Week week);
+    }
     public interface SetsFragmentEndingListener{
         void removeFragmentFromMainScreen();
     }
@@ -73,6 +92,7 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         setHasOptionsMenu(true);
         loadSharedPreferences(savedInstanceState);
         loadBundle(savedInstanceState);
+        mListOfTabItems = new ArrayList<>();
         mContext = getContext();
         mActivity = getActivity();
     }
@@ -98,12 +118,12 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
 //            String key = ONE_REP_MAX_LIST+i;
 //            editor.putInt(key,mOneRepMaxList.get(i));
 //        }
-        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getActivity().getSharedPreferences(getString(R.string.SETS_FRAGMENT_SHARED_PREFERENCE), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(BENCH_PRESS_PREFERENCE,mOneRepMaxList.get(0));
-        editor.putInt(SQUAT_PREFERENCE,mOneRepMaxList.get(1));
-        editor.putInt(DEADLIFT_PREFERENCE,mOneRepMaxList.get(2));
-        editor.putInt(OHP_PREFERENCE,mOneRepMaxList.get(3));
+        editor.putInt(getString(R.string.BENCH_PRESS_PREFERENCE),mOneRepMaxList.get(0));
+        editor.putInt(getString(R.string.SQUAT_PREFERENCE),mOneRepMaxList.get(1));
+        editor.putInt(getString(R.string.DEADLIFT_PREFERENCE),mOneRepMaxList.get(2));
+        editor.putInt(getString(R.string.OHP_PREFERENCE),mOneRepMaxList.get(3));
         editor.commit();
         //mActivityListener.removeFragmentFromMainScreen();
     }
@@ -151,12 +171,12 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
 
     private void loadSharedPreferences(Bundle savedInstanceState) {
         //TODO:Had an issue with trying to save a potentially larger list with shared preference
-        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME,0);
-        if(preferences.getInt(BENCH_PRESS_PREFERENCE,-1)!=-1){
-            mOneRepMaxList.add(preferences.getInt(BENCH_PRESS_PREFERENCE,-1));
-            mOneRepMaxList.add(preferences.getInt(SQUAT_PREFERENCE,-1));
-            mOneRepMaxList.add(preferences.getInt(DEADLIFT_PREFERENCE,-1));
-            mOneRepMaxList.add(preferences.getInt(OHP_PREFERENCE,-1));
+        SharedPreferences preferences = getActivity().getSharedPreferences(getString(R.string.SETS_FRAGMENT_SHARED_PREFERENCE),0);
+        if(preferences.getInt(getString(R.string.BENCH_PRESS_PREFERENCE),-1)!=-1){
+            mOneRepMaxList.add(preferences.getInt(getString(R.string.BENCH_PRESS_PREFERENCE),-1));
+            mOneRepMaxList.add(preferences.getInt(getString(R.string.SQUAT_PREFERENCE),-1));
+            mOneRepMaxList.add(preferences.getInt(getString(R.string.DEADLIFT_PREFERENCE),-1));
+            mOneRepMaxList.add(preferences.getInt(getString(R.string.OHP_PREFERENCE),-1));
         }
 //        if(preferences.getInt(BENCH_PRESS_PREFERENCE,-1)!=-1){
 //        for(int i=0;i<mOneRepMaxList.size();i++) {
@@ -257,6 +277,7 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
 
             }
         });
+
         mFragmentViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -280,7 +301,9 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         switch(item.getItemId()){
             case R.id.weight_help_setting:
                 WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
-                FragmentManager manager = ((AppCompatActivity)mContext).getFragmentManager();
+                //Nested Fragments must use ChildFragmentMangaer
+                //FragmentManager manager = ((AppCompatActivity)mContext).getFragmentManager();
+                android.support.v4.app.FragmentManager manager = getChildFragmentManager();
                 dialogFragment.show(manager,"weightHelperDialogFragment");
                 return true;
             case R.id.sets_action_notifications:
@@ -290,6 +313,21 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
             case R.id.sets_action_settings:
                 startActivity(new Intent(getContext(), SettingsActivity.class));
                 return true;
+            case R.id.timer_setting:
+                //TODO: Caution: If you invoke an intent and there is no app available on the device that can handle the intent, your app will crash.
+                //TODO: Permission should be outside application in manifest?? Looks like it
+                Intent clockIntent = new Intent(AlarmClock.ACTION_SET_TIMER);
+                clockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                //Makes sure that the phone can handle this intent
+                //If not app would crash and we'd need to handle it
+                PackageManager packageManager = getContext().getPackageManager();
+                List<ResolveInfo> activities = packageManager.queryIntentActivities(clockIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+                boolean isIntentSafe = activities.size() > 0;
+                if (isIntentSafe) {
+                    startActivity(clockIntent);
+                }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -315,14 +353,12 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         super.onResume();
         selectPage(mTabLayout.getSelectedTabPosition());
     }
-
+    /*
+       * Controls that when a tab is selected we want to move there and get rid of the focus that the EditText does
+       * First we request the focus from that edittext which shifts its attention the position we are ate
+       * THen we clear the focus so that the flashing cursor goes away
+       * */
     void selectPage(int pageIndex){
-        /*
-        * Controls that when a tab is selected we want to move there and get rid of the focus that the EditText does
-        * First we request the focus from that edittext which shifts its attention the position we are ate
-        * THen we clear the focus so that the flashing cursor goes away
-        * */
-
         mFragmentViewPager.setCurrentItem(pageIndex);
         // get the position of the currently selected tab and set selected to false
         mTabLayout.getTabAt(mTabLayout.getSelectedTabPosition()).getCustomView().setSelected(false);
@@ -330,23 +366,18 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
         mTabLayout.getTabAt(pageIndex).getCustomView().setSelected(true);
 
         mTabLayout.setScrollPosition(pageIndex,0f,true);
-        listOfLayouts.get(pageIndex).findViewById(R.id.weight_edit_text_view).requestFocus();
-        listOfLayouts.get(pageIndex).findViewById(R.id.weight_edit_text_view).clearFocus();
+        mListOfTabItems.get(pageIndex).findViewById(R.id.weight_edit_text_view).requestFocus();
+        mListOfTabItems.get(pageIndex).findViewById(R.id.weight_edit_text_view).clearFocus();
     }
 
     private void setUpCustomTabs(final int position, String exerciseType) {
-
         final ConstraintLayout tabGroupView = (ConstraintLayout) mActivity.getLayoutInflater().inflate(R.layout.custom_tab_item,null);
         final EditText oneRepMaxEditText = (EditText) tabGroupView.findViewById(R.id.weight_edit_text_view);
         TextView title = (TextView) tabGroupView.findViewById(R.id.type_of_exercise_text_view);
-
-        //oneRepMaxEditText.setText("100");
-        //mOneRepMaxList.size();
         title.setText(exerciseType);
         oneRepMaxEditText.setText(mOneRepMaxList.get(position).toString());
-        //oneRepMaxEditText.requestFocus();
         String input=oneRepMaxEditText.getText().toString();
-        listOfLayouts.add(tabGroupView);
+        mListOfTabItems.add(tabGroupView);
         oneRepMaxEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

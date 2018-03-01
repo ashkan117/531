@@ -1,4 +1,7 @@
-package com.example.ashkan.a531.Data;
+package com.example.ashkan.a531.Model;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.example.ashkan.a531.Fragments.GraphFragment;
 import com.example.ashkan.a531.R;
@@ -7,7 +10,7 @@ import com.example.ashkan.a531.R;
  * Created by Ashkan on 12/29/2017.
  */
 
-public class Week {
+public class Week implements Parcelable{
 
     private int mWeekNumber;
     private int mBenchPress;
@@ -25,6 +28,26 @@ public class Week {
         mDeadlift =deadlift;
         mOhp =ohp;
     }
+
+    protected Week(Parcel in) {
+        mWeekNumber = in.readInt();
+        mBenchPress = in.readInt();
+        mSquat = in.readInt();
+        mDeadlift = in.readInt();
+        mOhp = in.readInt();
+    }
+
+    public static final Creator<Week> CREATOR = new Creator<Week>() {
+        @Override
+        public Week createFromParcel(Parcel in) {
+            return new Week(in);
+        }
+
+        @Override
+        public Week[] newArray(int size) {
+            return new Week[size];
+        }
+    };
 
     public void setWeekNumber(int weekNumber){
         mWeekNumber=weekNumber;
@@ -89,5 +112,19 @@ public class Week {
 
     public long getId() {
         return mId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mWeekNumber);
+        dest.writeInt(mBenchPress);
+        dest.writeInt(mSquat);
+        dest.writeInt(mDeadlift);
+        dest.writeInt(mOhp);
     }
 }

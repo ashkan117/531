@@ -1,9 +1,8 @@
 package com.example.ashkan.a531.Fragments;
 
 
-import android.app.DialogFragment;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,7 @@ import com.example.ashkan.a531.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WeightHelperDialogFragment extends DialogFragment {
+public class WeightHelperDialogFragment extends android.support.v4.app.DialogFragment {
 
     private String inputString;
     private Button okButton;

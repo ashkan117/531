@@ -11,7 +11,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.example.ashkan.a531.Adapters.NotesViewPagerAdapter;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
@@ -46,7 +46,7 @@ public class NotesFragment extends DialogFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        inflater.inflate(R.menu.main_screen,menu);
+        inflater.inflate(R.menu.fragment_notes_menu,menu);
     }
 
 
@@ -57,6 +57,8 @@ public class NotesFragment extends DialogFragment {
         switch (item.getItemId()){
             case R.id.save_note_menu_item:
                 //DataManager.saveNote(currentItem,dbHelper);
+                Toast.makeText(getContext(),"Saved Note!",Toast.LENGTH_SHORT)
+                        .show();
                 saveNoteAsPreference();
                 closeKeyBoard();
                 return true;
@@ -126,9 +128,11 @@ public class NotesFragment extends DialogFragment {
 
         mViewPager = (ViewPager)rootView.findViewById(R.id.notes_view_pager);
         dbHelper = new OneRepMaxDataBaseHelper(getContext());
-        //TODO: FIgure out why it's getChildFragmentManager
-        FragmentManager manager = ((AppCompatActivity)getContext()).getSupportFragmentManager();
         //GraphFragmentPagerAdapter pagerAdapter = new GraphFragmentPagerAdapter(manager);
+
+        //TODO: Must call childFragmentManager in nested fragment situation. getChildFragment in parent fragment
+        //returns a private FragmentManager for placing and managing Fragments inside of this Fragment.
+        FragmentManager manager = getChildFragmentManager();
 
         Drawable[] images = getNotesDrawableImages();
         mPagerAdapter = new NotesViewPagerAdapter(manager);
@@ -178,7 +182,8 @@ public class NotesFragment extends DialogFragment {
         String[] titles = new String[]{"Bench Press","Squat","Deadlift","Overhead Press"};
         for(int i=0;i<4;i++){
             mTabLayout.getTabAt(i).setText(titles[i]);
-            mTabLayout.getTabAt(i).setIcon(images[i]);
+            //If I want to add icon change here
+            //mTabLayout.getTabAt(i).setIcon(images[i]);
         }
     }
 

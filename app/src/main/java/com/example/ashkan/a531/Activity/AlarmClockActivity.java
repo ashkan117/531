@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -21,7 +22,7 @@ import com.example.ashkan.a531.Data.AlarmClockHolder;
 import com.example.ashkan.a531.Data.ContractClass;
 import com.example.ashkan.a531.Data.DataManager;
 import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
-import com.example.ashkan.a531.Data.Time;
+import com.example.ashkan.a531.Model.Time;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
@@ -56,6 +57,8 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     private MediaPlayer mMediaPlayer;
     private AlarmClockRecyclerViewAdapter mRecyclerViewAdapter;
     private ContentResolver mContentResolver;
+    private DividerItemDecoration mDividerItemDecoration;
+    private LinearLayoutManager mLayoutManager;
 
 
     @Override
@@ -106,9 +109,12 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     private void initRecyclerView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(R.id.alarm_clock_recycler_view);
         //LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mRecyclerViewAdapter);
-
+        mDividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
+                mLayoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(mDividerItemDecoration);
         //make an instance of the ItemTouchHelper.Callback
         ItemTouchHelper.Callback simpleCallback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
             @Override

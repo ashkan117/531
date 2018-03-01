@@ -14,7 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.ashkan.a531.Data.Week;
+import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;

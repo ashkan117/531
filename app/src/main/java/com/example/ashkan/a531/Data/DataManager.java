@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.ashkan.a531.Data.ContractClass.AlarmClockEntry;
 import com.example.ashkan.a531.Data.ContractClass.OneRepMaxEntry;
+import com.example.ashkan.a531.Model.Week;
 
 import java.util.ArrayList;
 

@@ -15,9 +15,13 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        //can have multiple url inside one maven
         maven {
             //TODO: allows android studio to download repositories when needed
             url "https://maven.google.com"
+        }
+        maven {
+            url "https://jitpack.io"
         }
     }
 }

@@ -1,11 +1,11 @@
-package com.example.ashkan.a531;
+package com.example.ashkan.a531.Activity;
 
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.Button;
@@ -15,6 +15,7 @@ import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
 import com.example.ashkan.a531.Fragments.SetsFragment;
+import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
 
