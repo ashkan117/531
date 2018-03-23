@@ -47,12 +47,6 @@
             android:authorities="com.example.ashkan.a531"
             android:exported="false"/>
 
-        <uses-permission android:name="android.permission.INTERNET"/>
-
-        <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
-
-        <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-
         <service android:name=".MediaPlayerService"/>
 
         <activity

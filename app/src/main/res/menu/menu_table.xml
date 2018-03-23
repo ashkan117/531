@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="Add"
+        android:icon="@drawable/ic_add_black_24dp"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/table_action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/table_action_notifications"
+        android:title="@string/action_notifications"
+        app:showAsAction="never" />
+</menu>

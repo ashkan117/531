@@ -32,6 +32,7 @@ import java.util.ArrayList;
 public class NotesFragment extends DialogFragment {
 
 
+    private static final String TAG = NotesFragment.class.getSimpleName();
     private static final String NOTES_SHARED_PREFERENCES = "NotesSharedPreference";
     private TabLayout mTabLayout;
     private ViewPager mViewPager;

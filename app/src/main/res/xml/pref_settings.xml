@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="@string/preference_key_pounds_kilogram"
+        android:title="Pounds or Kilograms"
+        android:defaultValue="#00FFFF"
+        android:entries="@array/pounds_kilogram_string_array"
+        android:entryValues="@array/pounds_kilogram_values_array"
+        android:summary="Select the unit of weight"
+        />
+
+</PreferenceScreen>
