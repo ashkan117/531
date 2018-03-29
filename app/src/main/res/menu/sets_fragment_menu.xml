@@ -12,6 +12,7 @@
         android:icon="@drawable/clock_helper_setting"
         app:showAsAction="always"
         />
+    <!--
     <item
         android:id="@+id/sets_action_notifications"
         android:title="@string/notifications"
@@ -20,4 +21,5 @@
         android:id="@+id/sets_action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+        -->
 </menu>

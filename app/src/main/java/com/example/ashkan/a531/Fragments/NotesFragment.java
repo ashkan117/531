@@ -21,7 +21,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.example.ashkan.a531.Adapters.NotesViewPagerAdapter;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class NotesFragment extends DialogFragment {
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private NotesViewPagerAdapter mPagerAdapter;
-    private OneRepMaxDataBaseHelper dbHelper;
     private String NOTES_ID ="NotePreferencesString";
 
     public NotesFragment() {
@@ -128,10 +126,8 @@ public class NotesFragment extends DialogFragment {
         mTabLayout = (TabLayout)rootView.findViewById(R.id.notes_tab_layout);
 
         mViewPager = (ViewPager)rootView.findViewById(R.id.notes_view_pager);
-        dbHelper = new OneRepMaxDataBaseHelper(getContext());
-        //GraphFragmentPagerAdapter pagerAdapter = new GraphFragmentPagerAdapter(manager);
 
-        //TODO: Must call childFragmentManager in nested fragment situation. getChildFragment in parent fragment
+        //GraphFragmentPagerAdapter pagerAdapter = new GraphFragmentPagerAdapter(manager);
         //returns a private FragmentManager for placing and managing Fragments inside of this Fragment.
         FragmentManager manager = getChildFragmentManager();
 

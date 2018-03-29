@@ -2,8 +2,7 @@ package com.example.ashkan.a531.Fragments;
 
 
 import android.app.Fragment;
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,8 +17,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.ashkan.a531.Data.ContractClass;
-import com.example.ashkan.a531.Data.DataManager;
+import com.example.ashkan.a531.Data.ViewModel.WeekViewModel;
 import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 
@@ -44,7 +42,7 @@ public class GraphPointDialogFragment extends android.support.v4.app.DialogFragm
     private GetWeekInformationFromSetFragment mSetFragmentListener;
     private UpdateGraphFragmentListener mGraphFragmentListener;
     private Week mWeekToInsert;
-    private ContentResolver mContentResolver;
+    private WeekViewModel mWeekViewModel;
 
     public interface DialogListener{
         void returnInformationFromDialogToActivity(int weekNumber, String exerciseType, int oneRepMax);
@@ -86,7 +84,8 @@ public class GraphPointDialogFragment extends android.support.v4.app.DialogFragm
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContentResolver = getContext().getContentResolver();
+        mWeekViewModel = ViewModelProviders.of(getActivity()).get(WeekViewModel.class);
+
 
     }
 
@@ -108,11 +107,16 @@ public class GraphPointDialogFragment extends android.support.v4.app.DialogFragm
             public void onClick(View v) {
                 //Once this is clicked we need to ask the MainScreenActivity to get the week information and send it to us
 
+
                 mWeekToInsert = mSetFragmentListener.getWeekInfo();
                 int weekNumber = Integer.parseInt(mWeekNumberEditText.getText().toString());
                 mWeekToInsert.setWeekNumber(weekNumber);
-                ContentValues values = DataManager.contentValuesFromWeek(mWeekToInsert);
-                mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
+
+
+
+                //ContentValues values = DataManager.contentValuesFromWeek(mWeekToInsert);
+                mWeekViewModel.insertWeek(mWeekToInsert);
+                //mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
                 //DataManager.addOneRepMax(mWeekToInsert,helperDatabase);
                 mGraphFragmentListener.updateGraph();
                 dismiss();

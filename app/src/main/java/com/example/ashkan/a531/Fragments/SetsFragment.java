@@ -28,8 +28,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.ashkan.a531.Activity.AlarmClockActivity;
-import com.example.ashkan.a531.Activity.SettingsActivity;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
 import com.example.ashkan.a531.Interface.IMainScreen;
 import com.example.ashkan.a531.Model.Week;
@@ -306,6 +304,7 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
                 android.support.v4.app.FragmentManager manager = getChildFragmentManager();
                 dialogFragment.show(manager,"weightHelperDialogFragment");
                 return true;
+                /*
             case R.id.sets_action_notifications:
                 Intent intent = new Intent(getContext(), AlarmClockActivity.class);
                 startActivity(intent);
@@ -313,6 +312,7 @@ public class SetsFragment extends android.support.v4.app.Fragment implements Set
             case R.id.sets_action_settings:
                 startActivity(new Intent(getContext(), SettingsActivity.class));
                 return true;
+                */
             case R.id.timer_setting:
                 //TODO: Caution: If you invoke an intent and there is no app available on the device that can handle the intent, your app will crash.
                 //TODO: Permission should be outside application in manifest?? Looks like it

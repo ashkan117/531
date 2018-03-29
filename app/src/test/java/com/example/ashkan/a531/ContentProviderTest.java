@@ -4,9 +4,6 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.test.ProviderTestCase2;
 
-import com.example.ashkan.a531.Data.ContractClass;
-import com.example.ashkan.a531.Data.OneRepMaxContentProvider;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

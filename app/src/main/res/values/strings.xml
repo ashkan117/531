@@ -49,6 +49,8 @@
     <string name="OHP_PREFERENCE">ohpPreference</string>
     <string name="BENCH_PRESS_PREFERENCE">benchPressPreference</string>
     <string name="SETS_FRAGMENT_SHARED_PREFERENCE">setsFragmentSharedPreference</string>
+    <string name="tag_half_weight_helper_dialog_fragment">halfWeightHelperDialogFragment</string>
+    <string name="tag_weight_helper_dialog_fragment">weightHelperDialogFragment</string>
 
     <string-array name="pounds_kilogram_string_array">
         <item>Pounds</item>

@@ -7,8 +7,6 @@ import android.support.test.rule.ActivityTestRule;
 import android.view.Gravity;
 
 import com.example.ashkan.a531.Activity.MainScreen;
-import com.example.ashkan.a531.Data.DataManager;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
 
 import org.junit.Before;
 import org.junit.Rule;

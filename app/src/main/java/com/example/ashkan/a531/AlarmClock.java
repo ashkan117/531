@@ -16,8 +16,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.example.ashkan.a531.Data.AlarmClockHolder;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
+import com.example.ashkan.a531.Data.Alarm;
 import com.example.ashkan.a531.Model.Time;
 
 import java.util.ArrayList;
@@ -60,34 +59,34 @@ public class AlarmClock extends ConstraintLayout {
     private LinearLayout mDismissLayout;
     private Button mDismissButton;
     private AlarmActivityListener mActivityListener;
-    private OneRepMaxDataBaseHelper mDbHelper;
+    private Date mDate;
 
-    public void initClocks(AlarmClockHolder currentHolder) {
+    public void initClocks(Alarm currentHolder) {
             int hour = currentHolder.getHour();
             int minute = currentHolder.getMinute();
             boolean onOff = currentHolder.isOnOff();
-            boolean mondaySelected = currentHolder.isMondaySelected();
-            boolean tuesdaySelected = currentHolder.isTuesdaySelected();
-            boolean wednesdaySelected = currentHolder.isWednesdaySelected();
-            boolean thursdaySelected = currentHolder.isThursdaySelected();
-            boolean fridaySelected = currentHolder.isFridaySelected();
-            boolean saturdaySelected = currentHolder.isSaturdaySelected();
-            boolean sundaySelected = currentHolder.isSundaySelected();
-
+//            boolean mondaySelected = currentHolder.isMondaySelected();
+//            boolean tuesdaySelected = currentHolder.isTuesdaySelected();
+//            boolean wednesdaySelected = currentHolder.isWednesdaySelected();
+//            boolean thursdaySelected = currentHolder.isThursdaySelected();
+//            boolean fridaySelected = currentHolder.isFridaySelected();
+//            boolean saturdaySelected = currentHolder.isSaturdaySelected();
+//            boolean sundaySelected = currentHolder.isSundaySelected();
+//
 
             setTimePicker(new Time(hour,minute));
-            setMondayToggle(mondaySelected);
-            setSwitch(onOff);
-            setTuesdayToggle(tuesdaySelected);
-            setWednesdayToggle(wednesdaySelected);
-            setThursdayToggle(thursdaySelected);
-            setFridayToggle(fridaySelected);
-            setSaturdayToggle(saturdaySelected);
-            setSundayToggle(sundaySelected);
+//            setMondayToggle(mondaySelected);
+//            setSwitch(onOff);
+//            setTuesdayToggle(tuesdaySelected);
+//            setWednesdayToggle(wednesdaySelected);
+//            setThursdayToggle(thursdaySelected);
+//            setFridayToggle(fridaySelected);
+//            setSaturdayToggle(saturdaySelected);
+//            setSundayToggle(sundaySelected);
 
     }
 
-    public AlarmClockHolder getAlarmClockAsHolder(int position) {
+    public Alarm getAlarmClockAsHolder(int position) {
         int hour = mTimePicker.getHour();
         int minute = mTimePicker.getMinute();
         boolean onOff = mSwitch.isChecked();
@@ -100,18 +99,26 @@ public class AlarmClock extends ConstraintLayout {
         boolean sundaySelected = getSundayToggle().isChecked();
 
 
-        AlarmClockHolder alarmClockHolder = new AlarmClockHolder();
-        alarmClockHolder.setHour(hour);
-        alarmClockHolder.setMinute(minute);
-        alarmClockHolder.setPosition(position);
-        alarmClockHolder.setMondaySelected(mondaySelected);
-        alarmClockHolder.setTuesdaySelected(tuesdaySelected);
-        alarmClockHolder.setWednesdaySelected(wednesdaySelected);
-        alarmClockHolder.setThursdaySelected(thursdaySelected);
-        alarmClockHolder.setFridaySelected(fridaySelected);
-        alarmClockHolder.setSaturdaySelected(saturdaySelected);
-        alarmClockHolder.setSundaySelected(sundaySelected);
-        return alarmClockHolder;
+        Alarm alarm = new Alarm();
+        alarm.setHour(hour);
+        alarm.setMinute(minute);
+        alarm.setPositionInAdapter(position);
+//        alarm.setMondaySelected(mondaySelected);
+//        alarm.setTuesdaySelected(tuesdaySelected);
+//        alarm.setWednesdaySelected(wednesdaySelected);
+//        alarm.setThursdaySelected(thursdaySelected);
+//        alarm.setFridaySelected(fridaySelected);
+//        alarm.setSaturdaySelected(saturdaySelected);
+//        alarm.setSundaySelected(sundaySelected);
+        return alarm;
+    }
+
+    public Date getDate() {
+        return mDate;
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
     }
 
     public interface AlarmActivityListener{
@@ -159,96 +166,22 @@ public class AlarmClock extends ConstraintLayout {
 
     public AlarmClock(Context context) {
         super(context);
-        mContext = context;
-        init(context);
-        setToggles();
-        setToggleListeners();
-        setButtonListeners();
-        setSwitchListener();
-        setTime();
-        setClockListener();
     }
 
     public AlarmClock(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context,attrs);
-        setToggles();
-        setToggleListeners();
-        setSwitchListener();
-        setButtonListeners();
-        setTime();
-        setClockListener();
     }
 
     public AlarmClock(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context,attrs,defStyleAttr);
-        setToggles();
-        setToggleListeners();
         setSwitchListener();
-        setButtonListeners();
         setTime();
-        setClockListener();
     }
 
-    private void setButtonListeners() {
-        mDismissButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDismissLayout.setVisibility(GONE);
-            }
-        });
-    }
-
-    private void setClockListener() {
-        mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-            @Override
-            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                if(mSwitch.isChecked()){
-                    setTime();
-                    setToggles();
-                    updateDatabase();
-                    updateAlarm();
-                }
-            }
-
-
-        });
-    }
-
-    private void setToggles() {
-        ArrayList<Boolean> isToggleSelectedList = new ArrayList<>();
-        isSelected = new ArrayList<>();
-
-        for(int i=0;i<7;i++){
-            isSelected.add(false);
-        }
-
-        if(mMondayToggle.isChecked()){
-            isSelected.set(0,true);
-        }
-        if(mTuesdayToggle.isChecked()){
-            isSelected.set(1,true);
-        }
-        if(mWednesdayToggle.isChecked()){
-            isSelected.set(2,true);
-        }
-        if(mThursdayToggle.isChecked()){
-            isSelected.set(3,true);
-        }
-        if(mFridayToggle.isChecked()){
-            isSelected.set(4,true);
-        }
-        if(mSaturdayToggle.isChecked()){
-            isSelected.set(5,true);
-        }
-        if(mSundayToggle.isChecked()){
-            isSelected.set(6,true);
-        }
-    }
 
     private void updateDatabase() {
-        AlarmClockHolder holder = new AlarmClockHolder();
+        Alarm holder = new Alarm();
     }
 
     private void updateAlarm() {
@@ -288,7 +221,6 @@ public class AlarmClock extends ConstraintLayout {
                 boolean check = mSwitch.isChecked();
                 if(check){
                     setTime();
-                    setToggles();
                     boolean atLeastOne = false;
                     for(int i=0;i<isSelected.size();i++){
                         if(isSelected.get(i)==true){
@@ -366,7 +298,6 @@ public class AlarmClock extends ConstraintLayout {
 
         Intent intent = new Intent(mContext,NotificationReciever.class);
 
-        intent.setFlags(Intent.FILL_IN_DATA);
         /*
         * Need to save
         *   switch
@@ -669,68 +600,7 @@ public class AlarmClock extends ConstraintLayout {
         return daysToBeSet;
     }
 
-    private void setToggleListeners() {
-        isSelected = new ArrayList<Boolean>();
-        for(int i = 0; i<7 ;i++)
-        {
-            isSelected.add(false);
-        }
-        mMondayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mMondayToggle.isChecked();
-                isSelected.set(0, check);
-                if(check){
-                    Toast.makeText(getContext(),"Monday is clicked",Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(getContext(),"Monday is unselected",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        mTuesdayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mTuesdayToggle.isChecked();
-                isSelected.set(1, check);
-            }
-        });
-        mWednesdayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mWednesdayToggle.isChecked();
-                isSelected.set(2, check);
-            }
-        });
-        mThursdayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mThursdayToggle.isChecked();
-                isSelected.set(3, check);
-            }
-        });mFridayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mFridayToggle.isChecked();
-                isSelected.set(4, check);
-            }
-        });mSaturdayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mSaturdayToggle.isChecked();
-                isSelected.set(5, check);
-            }
-        });mSundayToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check =  mSundayToggle.isChecked();
-                isSelected.set(6, check);
-            }
-        });
 
-
-
-    }
 
     private void init(Context context)
     {
@@ -750,7 +620,6 @@ public class AlarmClock extends ConstraintLayout {
         mSwitch = (Switch) findViewById(R.id.time_switch);
         mDismissLayout = (LinearLayout) findViewById(R.id.dismiss_alarm_linear_layout);
         mDismissButton = (Button) findViewById(R.id.dismiss_alarm_button);
-        mDbHelper = new OneRepMaxDataBaseHelper(context);
         //mActivityListener = (AlarmActivityListener) context;
 
     }

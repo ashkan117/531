@@ -42,11 +42,6 @@
             </intent-filter>
         </receiver>
 
-        <provider
-            android:name=".Data.OneRepMaxContentProvider"
-            android:authorities="com.example.ashkan.a531"
-            android:exported="false"/>
-
         <service android:name=".MediaPlayerService"/>
 
         <activity

@@ -1,11 +1,11 @@
 package com.example.ashkan.a531.Activity;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -18,16 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ashkan.a531.AlarmClock;
-import com.example.ashkan.a531.Data.AlarmClockHolder;
-import com.example.ashkan.a531.Data.ContractClass;
-import com.example.ashkan.a531.Data.DataManager;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
-import com.example.ashkan.a531.Model.Time;
+import com.example.ashkan.a531.Data.Alarm;
+import com.example.ashkan.a531.Data.ViewModel.AlarmClockViewModel;
 import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static com.example.ashkan.a531.AlarmClock.HOUR_KEY;
 import static com.example.ashkan.a531.AlarmClock.MINUTE_KEY;
@@ -50,15 +48,13 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     private AlarmClock mAlarmClock;
     private FloatingActionButton mFab;
     private ArrayList<AlarmClock> mAlarmClockList;
-    private ArrayList<AlarmClockHolder> mAlarmClockHolders;
-    OneRepMaxDataBaseHelper dbHelper = new OneRepMaxDataBaseHelper(this);
+    private List<Alarm> mAlarms;
     private ViewGroup mRootView;
     private RecyclerView mRecyclerView;
-    private MediaPlayer mMediaPlayer;
     private AlarmClockRecyclerViewAdapter mRecyclerViewAdapter;
-    private ContentResolver mContentResolver;
     private DividerItemDecoration mDividerItemDecoration;
     private LinearLayoutManager mLayoutManager;
+    private AlarmClockViewModel mAlarmClockViewModel;
 
 
     @Override
@@ -71,22 +67,29 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_clock);
-        mContentResolver = getContentResolver();
+
+        mAlarmClockViewModel = ViewModelProviders.of(this).get(AlarmClockViewModel.class);
+        mAlarms = mAlarmClockViewModel.getAllAlarms().getValue();
+        mAlarmClockViewModel.getAllAlarms().observe(this, new Observer<List<Alarm>>() {
+            @Override
+            public void onChanged(@Nullable List<Alarm> alarms) {
+                mAlarms = alarms;
+            }
+        });
 
         initViews();
         mAlarmClockList = new ArrayList<AlarmClock>();
 
 
-        mAlarmClockHolders = getListOfAlarmClockHolders();
-        if(mAlarmClockHolders==null){
-            mAlarmClockHolders = new ArrayList<AlarmClockHolder>();
+        if(mAlarms ==null){
+            mAlarms = new ArrayList<Alarm>();
         }
 
-        mRecyclerViewAdapter = new AlarmClockRecyclerViewAdapter(this,mAlarmClockHolders);
+        mRecyclerViewAdapter = new AlarmClockRecyclerViewAdapter(this, mAlarms);
 
-        if(mAlarmClockHolders!=null){
+        if(mAlarms !=null){
             //initClocks();
-           // mRecyclerViewAdapter = new AlarmClockRecyclerViewAdapter(this,mAlarmClockHolders);
+           // mRecyclerViewAdapter = new AlarmClockRecyclerViewAdapter(this,mAlarms);
         }
 
 
@@ -125,14 +128,9 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                int positionInData = mAlarmClockHolders.get(position).getPositionInDatabase();
-                mAlarmClockHolders.remove(position);
-                //DataManager.deleteAlarmClock(positionInData,dbHelper);
-                ContentValues values = new ContentValues();
-                String where = ContractClass.AlarmClockEntry.COLUMN_NAME_POSITION;
-                String[] whereArgs = new String[]{String.valueOf(positionInData)};
-                mContentResolver.delete(ContractClass.AlarmClockEntry.CONTENT_URI,where,whereArgs);
-                mRecyclerViewAdapter.notifyItemRemoved(position);
+                int positionInData = mAlarms.get(position).getPositionInDatabase();
+                Alarm alarm = mAlarms.get(positionInData);
+                mAlarmClockViewModel.removeClockAtPosition(alarm);
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -185,10 +183,6 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     }
 
 
-    private ArrayList<AlarmClockHolder> getListOfAlarmClockHolders() {
-        return DataManager.getListOfAlarmClockHolders(dbHelper);
-    }
-
     private void retrieveExtrasAndRestoreViews(Bundle possibleExtrasToStartAlarm) {
         //Bundle extras = possibleExtrasToStartAlarm.getBundle(INTENT_EXTRAS_FROM_SET_CLOCK);
         Bundle extras = possibleExtrasToStartAlarm;
@@ -225,19 +219,18 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
     }
 
     private void saveAlarmClocks() {
-        AlarmClockHolder holder = new AlarmClockHolder();
+        Alarm holder = new Alarm();
         AlarmClock currentAlarm;
         int updatedRows;
-        if(mAlarmClockHolders.size()==0){
-            DataManager.emptyClocks(dbHelper);
+        if(mAlarms.size()==0){
             return;
         }
-        for(int i=0;i<mAlarmClockHolders.size();i++){
+        for(int i = 0; i< mAlarms.size(); i++){
             AlarmClockRecyclerViewAdapter.AlarmClockViewHolder viewHolder =
                     (AlarmClockRecyclerViewAdapter.AlarmClockViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
             holder = viewHolder.mAlarmClock.getAlarmClockAsHolder(i);
 
-            updatedRows = DataManager.maintainClocks(holder,dbHelper);
+            //updatedRows = DataManager.maintainClocks(holder,dbHelper);
 
         }
     }
@@ -248,7 +241,7 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
         mRootView = (ViewGroup) findViewById(R.id.alarm_clock_root_view);
         //TODO:Add swipability to the alarms
 
-        CardView clock = (CardView) inflater.inflate(R.layout.alarm_clock,null);
+        CardView clock = (CardView) inflater.inflate(R.layout.alarm_clock, null);
         mFab = (FloatingActionButton) mRootView.findViewById(R.id.alarm_clock_fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -261,54 +254,19 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
                 Date now = calendar.getTime();
                 int hour = calendar.get(Calendar.HOUR_OF_DAY);
                 int minute = calendar.get(Calendar.MINUTE);
-                AlarmClockHolder holder = new AlarmClockHolder();
-                holder.setHour(hour);
-                holder.setMinute(minute);
-                if(mAlarmClockHolders.size()!=0){
-                    holder.setPosition(mAlarmClockHolders.size());
-                }
-                mAlarmClockHolders.add(holder);
+                Alarm alarm = new Alarm();
+                alarm.setHour(hour);
+                alarm.setMinute(minute);
+
+                mAlarmClockViewModel.insertNewAlarmClock(alarm);
                 AlarmClock currentClock = (AlarmClock) mRecyclerView.findViewById(R.id.alarm_clock_item);
-                DataManager.insertNewAlarmClock(holder,dbHelper);
-                mRecyclerViewAdapter.notifyItemInserted(mAlarmClockHolders.size());
+                currentClock.setDate(now);
             }
         });
     }
 
-    private void initClocks() {
-        AlarmClockHolder currentHolder;
-        for(int i=0;i<mAlarmClockHolders.size();i++){
-            currentHolder = mAlarmClockHolders.get(i);
-            int hour = currentHolder.getHour();
-            int minute = currentHolder.getMinute();
-            boolean onOff = currentHolder.isOnOff();
-            boolean mondaySelected = currentHolder.isMondaySelected();
-            boolean tuesdaySelected = currentHolder.isTuesdaySelected();
-            boolean wednesdaySelected = currentHolder.isWednesdaySelected();
-            boolean thursdaySelected = currentHolder.isThursdaySelected();
-            boolean fridaySelected = currentHolder.isFridaySelected();
-            boolean saturdaySelected = currentHolder.isSaturdaySelected();
-            boolean sundaySelected = currentHolder.isSundaySelected();
-
-            mAlarmClock = new AlarmClock(this);
-            mAlarmClock.setTimePicker(new Time(hour,minute));
-            mAlarmClock.setSwitch(onOff);
-            mAlarmClock.setMondayToggle(mondaySelected);
-            mAlarmClock.setTuesdayToggle(tuesdaySelected);
-            mAlarmClock.setWednesdayToggle(wednesdaySelected);
-            mAlarmClock.setThursdayToggle(thursdaySelected);
-            mAlarmClock.setFridayToggle(fridaySelected);
-            mAlarmClock.setSaturdayToggle(saturdaySelected);
-            mAlarmClock.setSundayToggle(sundaySelected);
-
-            mAlarmClockList.add(mAlarmClock);
-            mRecyclerView.addView(mAlarmClock);
-            mRecyclerView.addView(mAlarmClock);
-        }
-    }
-
     private void insertAlarmClock(ArrayList<AlarmClock> alarmClockList) {
-        AlarmClockHolder holder = new AlarmClockHolder();
+        Alarm holder = new Alarm();
         int position = alarmClockList.size()-1;
         AlarmClock alarmClock = alarmClockList.get(position);
         int hour = alarmClock.getTimePicker().getHour();
@@ -322,19 +280,19 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
         boolean saturdaySelected = alarmClock.getSaturdayToggle().isSelected();
         boolean sundaySelected = alarmClock.getSundayToggle().isSelected();
 
-        holder.setPosition(position);
+        holder.setPositionInAdapter(position);
         holder.setHour(hour);
         holder.setMinute(minute);
         holder.setOnOff(onOff);
-        holder.setMondaySelected(mondaySelected);
-        holder.setTuesdaySelected(tuesdaySelected);
-        holder.setWednesdaySelected(wednesdaySelected);
-        holder.setThursdaySelected(thursdaySelected);
-        holder.setFridaySelected(fridaySelected);
-        holder.setSaturdaySelected(saturdaySelected);
-        holder.setSundaySelected(sundaySelected);
+//        holder.setMondaySelected(mondaySelected);
+//        holder.setTuesdaySelected(tuesdaySelected);
+//        holder.setWednesdaySelected(wednesdaySelected);
+//        holder.setThursdaySelected(thursdaySelected);
+//        holder.setFridaySelected(fridaySelected);
+//        holder.setSaturdaySelected(saturdaySelected);
+//        holder.setSundaySelected(sundaySelected);
 
-        DataManager.insertNewAlarmClock(holder,dbHelper);
+        //DataManager.insertNewAlarmClock(holder,dbHelper);
     }
 
 
@@ -345,13 +303,13 @@ public class AlarmClockActivity extends AppCompatActivity implements AlarmClock.
 
     public class AlarmClockRecyclerViewAdapter extends RecyclerView.Adapter<AlarmClockRecyclerViewAdapter.AlarmClockViewHolder>{
 
-        private ArrayList<AlarmClockHolder> mAlarmClocks;
+        private ArrayList<Alarm> mAlarmClocks;
         private Context mContext;
         private final LayoutInflater mLayoutInflater;
 
-        public AlarmClockRecyclerViewAdapter(Context context , ArrayList<AlarmClockHolder> alarmClocks){
+        public AlarmClockRecyclerViewAdapter(Context context , List<Alarm> alarmClocks){
             mContext = context;
-            mAlarmClocks = alarmClocks;
+            mAlarms = alarmClocks;
             mLayoutInflater = LayoutInflater.from(context);
         }
 

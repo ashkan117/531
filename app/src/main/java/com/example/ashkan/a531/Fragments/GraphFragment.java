@@ -1,10 +1,10 @@
 package com.example.ashkan.a531.Fragments;
 
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -19,10 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.ashkan.a531.Adapters.TableRecycleViewAdapter;
-import com.example.ashkan.a531.Data.ContractClass;
-import com.example.ashkan.a531.Data.DataManager;
-import com.example.ashkan.a531.Data.OneRepMaxContentProvider;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
+import com.example.ashkan.a531.Data.ViewModel.WeekViewModel;
 import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 import com.jjoe64.graphview.GraphView;
@@ -32,6 +29,7 @@ import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static com.example.ashkan.a531.Fragments.GraphFragment.Exercise.BENCH_PRESS;
@@ -52,23 +50,23 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     private int mWeekNumber;
     private String mExerciseType;
     private int mOneRepMax;
-    private GraphView graph;
+    private GraphView mGraphView;
     private Context mContext;
     private LineGraphSeries<DataPoint> benchSeries;
     private Random mRand = new Random();
     private RecyclerView mRecyclerView;
-    private ArrayList<Week> mListOfWeeks;
+    private List<Week> mListOfWeeks;
+    private LiveData<List<Week>> mListOfWeeksLiveData;
     private TableRecycleViewAdapter recycleViewAdapter;
     private SQLiteDatabase db;
     private Button insertWeekButton;
     private Week mWeekToInsert;
-    private OneRepMaxDataBaseHelper helperDatabase;
     private EditText mWeekNumberEditText;
     private LineGraphSeries<DataPointInterface> squatSeries;
     private LineGraphSeries<DataPointInterface> deadLiftSeries;
     private LineGraphSeries<DataPointInterface> ohpSeries;
     private ArrayList<Week> allExercisesList;
-    private ContentResolver mContentResolver;
+    private WeekViewModel mWeekViewModel;
 
     public GraphFragment() {
         // Required empty public constructor
@@ -90,9 +88,25 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContentResolver = getContext().getContentResolver();
-        //helperDatabase = new OneRepMaxDataBaseHelper(getContext());
-//         db = helperDatabase.getReadableDatabase();
+        mWeekViewModel = ViewModelProviders.of(getActivity()).get(WeekViewModel.class);
+        mListOfWeeks = mWeekViewModel.getAllWeeks().getValue();
+        mWeekViewModel.getAllWeeks().observe(getActivity(), new Observer<List<Week>>() {
+            @Override
+            public void onChanged(@Nullable List<Week> weeks) {
+                mListOfWeeks = sortInASC(weeks);
+                loadDataPoints();
+                initGraph();
+                updateSeriesOfGraph();
+            }
+        });
+    }
+
+    private void updateSeriesOfGraph() {
+        mGraphView.removeAllSeries();
+        mGraphView.addSeries(benchSeries);
+        mGraphView.addSeries(squatSeries);
+        mGraphView.addSeries(deadLiftSeries);
+        mGraphView.addSeries(ohpSeries);
     }
 
     @Override
@@ -102,7 +116,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         View viewGroup = (View) inflater.inflate(R.layout.fragment_graph,container,false);
         initViews(viewGroup);
 
-        //TODO: tried using graph inside fragment but it wont let me
+        //TODO: tried using mGraphView inside fragment but it wont let me
         //TODO: Useful way of getting support fragment from inside a fragment that is not support
         //FragmentManager manager = ((AppCompatActivity)mContext).getSupportFragmentManager();
         //GraphFragmentPagerAdapter pagerAdapter = new GraphFragmentPagerAdapter(manager);
@@ -115,7 +129,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
     private void handleSingularWeek() {
         if(allExercisesList.size()==1){
-            graph.removeAllSeries();
+            mGraphView.removeAllSeries();
             //convertLineGraphToPoint();
         }
     }
@@ -135,12 +149,8 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
                 customDialog.show(getFragmentManager(),"CustomDialog");
             }
         });
-//        //mListOfWeeks = getListOfWeeks(helperDatabase);
-//        Cursor listOfCursors = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null);
-//        mListOfWeeks = DataManager.listOfWeeksFromCursor(listOfCursors);
-        getWeeksFromDatabase();
 
-        graph = (GraphView) viewGroup.findViewById(R.id.graph);
+        mGraphView = (GraphView) viewGroup.findViewById(R.id.graph);
 
         benchSeries = new LineGraphSeries<>();
         squatSeries = new LineGraphSeries<>();
@@ -148,31 +158,28 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         ohpSeries = new LineGraphSeries<>();
     }
 
-    private void getWeeksFromDatabase() {
-
-        Cursor listOfCursors = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null);
-        mListOfWeeks = DataManager.listOfWeeksFromCursor(listOfCursors);
-    }
-
     private void loadDataPoints() {
         //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
-        Cursor listOfWeeksCursor = mContentResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null,null,null);
-        allExercisesList = DataManager.listOfWeeksFromCursor(listOfWeeksCursor);
         //Must sort DataPoints in asc order
-        sortInASC(allExercisesList);
-        //extracts the specific exercise from the total list into an array list of data points
-        DataPoint[] squat = getExersise1RPMFromDatabase(SQUAT, allExercisesList);
-        DataPoint[] bench = getExersise1RPMFromDatabase(BENCH_PRESS, allExercisesList);
-        DataPoint[] deadlift = getExersise1RPMFromDatabase(DEADLIFT, allExercisesList);
-        DataPoint[] ohp = getExersise1RPMFromDatabase(OHP, allExercisesList);
-        //assigns those data points to a LineGraphSeries
-        addDataPointToSeries(BENCH_PRESS,bench);
-        addDataPointToSeries(SQUAT,squat);
-        addDataPointToSeries(DEADLIFT,deadlift);
-        addDataPointToSeries(OHP,ohp);
+        if(mListOfWeeks != null) {
+            sortInASC(mListOfWeeks);
+            //extracts the specific exercise from the total list into an array list of data points
+            DataPoint[] squat = getExersise1RPMFromDatabase(SQUAT, mListOfWeeks);
+            DataPoint[] bench = getExersise1RPMFromDatabase(BENCH_PRESS, mListOfWeeks);
+            DataPoint[] deadlift = getExersise1RPMFromDatabase(DEADLIFT, mListOfWeeks);
+            DataPoint[] ohp = getExersise1RPMFromDatabase(OHP, mListOfWeeks);
+            //assigns those data points to a LineGraphSeries
+            addDataPointToSeries(BENCH_PRESS, bench);
+            addDataPointToSeries(SQUAT, squat);
+            addDataPointToSeries(DEADLIFT, deadlift);
+            addDataPointToSeries(OHP, ohp);
+        }
+        else{
+            mListOfWeeks = new ArrayList<>();
+        }
     }
 
-    private void sortInASC(ArrayList<Week> list) {
+    private List<Week> sortInASC(List<Week> list) {
         //TODO: IS this a possible reference issue?
         //Receive the data in asc or store it as asc so we dont need to sort it often
         for(int i=0;i<list.size()-1;i++){
@@ -182,39 +189,44 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
                 list.set(i+1,temp);
             }
         }
+        return list;
     }
 
     private void addDataPointToSeries(Exercise whichExercise, DataPoint[] exercise) {
         switch(whichExercise){
             case BENCH_PRESS:
-                for(int i=0;i<exercise.length;i++){
-                    benchSeries.appendData(exercise[i],true,24);
-                }
+                benchSeries.resetData(exercise);
+//                for(int i=0;i<exercise.length;i++){
+//                    benchSeries.appendData(exercise[i],true,24);
+//                }
                 break;
             case SQUAT:
-                for(int i=0;i<exercise.length;i++){
-                    squatSeries.appendData(exercise[i],true,24);
-                }
+                squatSeries.resetData(exercise);
+//                for(int i=0;i<exercise.length;i++){
+//                    squatSeries.appendData(exercise[i],true,24);
+//                }
                 break;
             case DEADLIFT:
-                for(int i=0;i<exercise.length;i++){
-                    deadLiftSeries.appendData(exercise[i],true,24);
-                }
+                deadLiftSeries.resetData(exercise);
+//                for(int i=0;i<exercise.length;i++){
+//                    deadLiftSeries.appendData(exercise[i],true,24);
+//                }
                 break;
             case OHP:
-                for(int i=0;i<exercise.length;i++){
-                    ohpSeries.appendData(exercise[i],true,24);
-                }
+                ohpSeries.resetData(exercise);
+//                for(int i=0;i<exercise.length;i++){
+//                    ohpSeries.appendData(exercise[i],true,24);
+//                }
                 break;
         }
     }
 
-    private DataPoint[] getExersise1RPMFromDatabase(Exercise whichExercise, ArrayList<Week> list) {
+    private DataPoint[] getExersise1RPMFromDatabase(Exercise whichExercise, List<Week> list) {
         //TODO: dataPoints must be sorted in ascending order
 
-        //making it return a DataPoint[] since thats what the graph prefers (instead of arraylist)
+        //making it return a DataPoint[] since thats what the mGraphView prefers (instead of arraylist)
         ArrayList<DataPoint> exercise = new ArrayList<>();
-        DataPoint[] exerciseArray = new DataPoint[allExercisesList.size()];
+        DataPoint[] exerciseArray = new DataPoint[list.size()];
         switch(whichExercise){
             case BENCH_PRESS:
                 for(int i=0;i<list.size();i++){
@@ -251,7 +263,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
     private void initGraph() {
 
-        //fixed/manual graph
+        //fixed/manual mGraphView
         if(mListOfWeeks.size()>0){
             setFixedGraph();
         }
@@ -260,7 +272,7 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         }
         //setFixedGraph();
 
-        //scalable graph
+        //scalable mGraphView
 
         //set some properties
         squatSeries.setColor(Color.RED);
@@ -279,25 +291,25 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         deadLiftSeries.setDrawDataPoints(true);
         ohpSeries.setDrawDataPoints(true);
 
-        graph.setTitle("Progress");
+        mGraphView.setTitle("Progress");
 
 
-        graph.getGridLabelRenderer().setHumanRounding(true);
+        mGraphView.getGridLabelRenderer().setHumanRounding(true);
 
-        graph.getGridLabelRenderer().setHorizontalAxisTitle("Week");
-        graph.getGridLabelRenderer().setHorizontalAxisTitleTextSize(36);
-        graph.getGridLabelRenderer().setLabelHorizontalHeight(88);
-        graph.getGridLabelRenderer().setVerticalAxisTitle("Ib/Kgs");
-        graph.getGridLabelRenderer().setVerticalAxisTitleTextSize(36);
+        mGraphView.getGridLabelRenderer().setHorizontalAxisTitle("Week");
+        mGraphView.getGridLabelRenderer().setHorizontalAxisTitleTextSize(36);
+        mGraphView.getGridLabelRenderer().setLabelHorizontalHeight(88);
+        mGraphView.getGridLabelRenderer().setVerticalAxisTitle("Ib/Kgs");
+        mGraphView.getGridLabelRenderer().setVerticalAxisTitleTextSize(36);
 
-        graph.getLegendRenderer().setVisible(true);
-        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+        mGraphView.getLegendRenderer().setVisible(true);
+        mGraphView.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
-        //add the series to the graph
-        graph.addSeries(benchSeries);
-        graph.addSeries(squatSeries);
-        graph.addSeries(deadLiftSeries);
-        graph.addSeries(ohpSeries);
+        //add the series to the mGraphView
+        mGraphView.addSeries(benchSeries);
+        mGraphView.addSeries(squatSeries);
+        mGraphView.addSeries(deadLiftSeries);
+        mGraphView.addSeries(ohpSeries);
     }
 
     private void setFixedGraph() {
@@ -305,15 +317,15 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
         int maxY = getMaxY();
         int count = mListOfWeeks.size();
         int maxX = mListOfWeeks.get(count-1).getWeekNumber();
-        graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMaxY(maxY+(maxY*.6));
-        graph.getViewport().setMinY(0);
+        mGraphView.getViewport().setYAxisBoundsManual(true);
+        mGraphView.getViewport().setMaxY(maxY+(maxY*.6));
+        mGraphView.getViewport().setMinY(0);
 
         //set manual x bounds
-        graph.getViewport().setXAxisBoundsManual(true);
+        mGraphView.getViewport().setXAxisBoundsManual(true);
         //so that points are not at edge
-        graph.getViewport().setMaxX(maxX+(maxX*.5));
-        graph.getViewport().setMinX(0);
+        mGraphView.getViewport().setMaxX(maxX+(maxX*.5));
+        mGraphView.getViewport().setMinX(0);
 
 
     }
@@ -342,16 +354,16 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
     private void setScalableGraph() {
         // activate horizontal zooming and scrolling
-        graph.getViewport().setScalable(true);
+        mGraphView.getViewport().setScalable(true);
 
         // activate horizontal scrolling
-        graph.getViewport().setScrollable(true);
+        mGraphView.getViewport().setScrollable(true);
 
         // activate horizontal and vertical zooming and scrolling
-        graph.getViewport().setScalableY(true);
+        mGraphView.getViewport().setScalableY(true);
 
         // activate vertical scrolling
-        graph.getViewport().setScrollableY(true);
+        mGraphView.getViewport().setScrollableY(true);
 
     }
 
@@ -369,84 +381,25 @@ public class GraphFragment extends android.support.v4.app.Fragment implements Gr
 
         Week week = new Week(mWeekNumber,-1,-1,-1,-1);
         week.setExercise(mExerciseType,mOneRepMax,this);
-        ContentValues values = DataManager.contentValuesFromWeek(week);
-        if(weekExists())
-        {
-            String where = ContractClass.OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER;
-            String[] whereArgs = new String[]{String.valueOf(week.getWeekNumber())};
-            mContentResolver.update(ContractClass.OneRepMaxEntry.CONTENT_URI,values,where,whereArgs);
-            //DataManager.updateExerciseEntry(week,helperDatabase);
 
-        }
-        else{
-            //DataManager.addOneRepMax(week,helperDatabase);
-            mContentResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
-        }
+        mWeekViewModel.insertWeek(week);
 
-        updateListAndSort(mExerciseType);
         //updateGraph();
 
     }
     @Override
     public void updateGraph() {
-        //graph.removeAllSeries();
-        //this removes all the series but we want to update them not remove
-        //  removing means we need to reattach series to graph
-        //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
 
-        Cursor listOfCursors = mContentResolver.query(ContractClass.AlarmClockEntry.CONTENT_URI,null,null,null,null);
-        allExercisesList = DataManager.listOfWeeksFromCursor(listOfCursors);
         //Must sort DataPoints in asc order
-        sortInASC(allExercisesList);
+        sortInASC(mListOfWeeks);
         //extracts the specific exercise from the total list into an array list of data points
-        DataPoint[] squat = getExersise1RPMFromDatabase(SQUAT, allExercisesList);
-        DataPoint[] bench = getExersise1RPMFromDatabase(BENCH_PRESS, allExercisesList);
-        DataPoint[] deadlift = getExersise1RPMFromDatabase(DEADLIFT, allExercisesList);
-        DataPoint[] ohp = getExersise1RPMFromDatabase(OHP, allExercisesList);
-        //assigns those data points to a LineGraphSeries
-        //ISSUE: using append when trying to update doesnt work the way i thought
-        //  append adds to the datapoint[]
-        //  reset is more appropriate
-        //      reset switches one datapoint[] with another
+        DataPoint[] squat = getExersise1RPMFromDatabase(SQUAT, mListOfWeeks);
+        DataPoint[] bench = getExersise1RPMFromDatabase(BENCH_PRESS, mListOfWeeks);
+        DataPoint[] deadlift = getExersise1RPMFromDatabase(DEADLIFT, mListOfWeeks);
+        DataPoint[] ohp = getExersise1RPMFromDatabase(OHP, mListOfWeeks);
         benchSeries.resetData(bench);
         squatSeries.resetData(squat);
         deadLiftSeries.resetData(deadlift);
         ohpSeries.resetData(ohp);
     }
-
-    private void updateListAndSort(String exercise) {
-        //allExercisesList = DataManager.getListOfWeeks(helperDatabase);
-
-        Cursor listOfCursors = mContentResolver.query(ContractClass.AlarmClockEntry.CONTENT_URI,null,null,null,null);
-        allExercisesList = DataManager.listOfWeeksFromCursor(listOfCursors);
-        sortInASC(allExercisesList);
-        DataPoint[] dataPointArray = new DataPoint[allExercisesList.size()];
-        switch (exercise){
-            case "Bench Press":
-                dataPointArray = getExersise1RPMFromDatabase(BENCH_PRESS,allExercisesList);
-                benchSeries.resetData(dataPointArray);
-                break;
-            case "Squat":
-                dataPointArray = getExersise1RPMFromDatabase(SQUAT,allExercisesList);
-                squatSeries.resetData(dataPointArray);
-                break;
-            case "Deadlift":
-                dataPointArray = getExersise1RPMFromDatabase(DEADLIFT,allExercisesList);
-                deadLiftSeries.resetData(dataPointArray);
-                break;
-            case "Overhead Press":
-                dataPointArray = getExersise1RPMFromDatabase(OHP,allExercisesList);
-                ohpSeries.resetData(dataPointArray);
-                break;
-
-        }
-    }
-
-    private boolean weekExists() {
-        Week week = new Week();
-        week.setExercise(mExerciseType,mOneRepMax,this);
-        week.setWeekNumber(mWeekNumber);
-        return OneRepMaxContentProvider.weekExists(week,helperDatabase);
-    }
-
 }

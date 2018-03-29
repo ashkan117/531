@@ -2,7 +2,6 @@ package com.example.ashkan.a531.Activity;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -26,8 +25,7 @@ import android.widget.EditText;
 
 import com.example.ashkan.a531.Adapters.CustomViewPagerAdapter;
 import com.example.ashkan.a531.Adapters.SetFragmentPageAdapter;
-import com.example.ashkan.a531.Data.DataManager;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
+import com.example.ashkan.a531.DialogFragments.HalfWeightHelperDialogFragment;
 import com.example.ashkan.a531.FragmentTag;
 import com.example.ashkan.a531.Fragments.CalculatorFragment;
 import com.example.ashkan.a531.Fragments.GraphFragment;
@@ -67,7 +65,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private android.support.v4.app.FragmentManager mFragmentManager;
     private FragmentTransaction mFragmentTransaction;
     public static final String ONE_REP_MAX_LIST = "ONE_REP_MAX_LIST";
-    OneRepMaxDataBaseHelper dbHelper = new OneRepMaxDataBaseHelper(this);
     private EditText oneRepMaxEditText;
     private String PREFS_NAME="MainScreenSharedPrefs";
     private SetsFragment mSetsFragment;
@@ -100,7 +97,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
     private int TABLE_NAV_MENU_INDEX;
     private View otherFragmentsLayout;
     private String ACTIVE_FRAGMENT="";
-    private DataManager mDataManager;
     private ContentResolver mContectResolver;
 
     //Simulates the stack
@@ -143,7 +139,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         setContentView(R.layout.activity_main_screen);
         invalidateOptionsMenu();
 
-        mDataManager = DataManager.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -199,7 +194,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         //Only add the fragment if its empty
         if(mSetsFragment==null){
             mSetsFragment = new SetsFragment();
-            navMenuIndex=SETS_NAV_MENU_INDEX;
+            navMenuIndex = SETS_NAV_MENU_INDEX;
             mFragmentTransaction.add(R.id.main_screen_fragment_container,mSetsFragment,
                     getString(R.string.tag_fragment_sets));
             mFragmentTransaction.commit();
@@ -218,47 +213,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
 
     }
 
-    private void performProperTab(TabLayout.Tab tab) {
-        mFragmentTransaction = mFragmentManager.beginTransaction();
-        switch (tab.getText().toString()){
-            case "Progress" :
-                mGraphFragment = new GraphFragment();
-                navMenuIndex= PROGRESS_NAV_MENU_ITEM;
-                //hideSetView();
-                mFragmentTransaction.replace(R.id.main_screen_fragment_container, mGraphFragment,
-                        getString(R.string.tag_fragment_graph));
-                mFragmentTransaction.commit();
-                mFragmentTransaction.addToBackStack(getString(R.string.tag_fragment_graph));
-                break;
-            case "Calculator":
-                mCalculatorFragment = new CalculatorFragment();
-                navMenuIndex= CALCULATOR_NAV_MENU_INDEX;
-                //hideSetView();
-                mFragmentTransaction.replace(R.id.main_screen_fragment_container,mCalculatorFragment,
-                        getString(R.string.tag_fragment_calculator));
-                mFragmentTransaction.commit();
-                mFragmentTransaction.addToBackStack(getString(R.string.tag_fragment_calculator));
-                break;
-            case "Notes" :
-                mNotesFragment = new NotesFragment();
-                navMenuIndex= NOTES_MENU_INDEX;
-                mFragmentTransaction.replace(R.id.main_screen_fragment_container,mNotesFragment,
-                        getString(R.string.tag_fragment_notes));
-                mFragmentTransaction.commit();
-                mFragmentTransaction.addToBackStack(getString(R.string.tag_fragment_notes));
-                break;
-            case "Workout":
-                mSetsFragment = new SetsFragment();
-                navMenuIndex= SETS_NAV_MENU_INDEX;
-                mFragmentTransaction.add(R.id.main_screen_fragment_container,mSetsFragment,
-                        getString(R.string.tag_fragment_sets));
-                mFragmentTransaction.commit();
-                break;
-        }
-    }
-
-
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
@@ -267,6 +221,9 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         }
         else if(navMenuIndex==NOTES_MENU_INDEX){
             getMenuInflater().inflate(R.menu.fragment_notes_menu,menu);
+        }
+        else if(navMenuIndex == CALCULATOR_NAV_MENU_INDEX){
+            getMenuInflater().inflate(R.menu.menu_calculator,menu);
         }
         else {
             getMenuInflater().inflate(R.menu.main_screen, menu);
@@ -282,6 +239,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
+        /*
         if (id == R.id.sets_action_notifications) {
             Intent intent = new Intent(this,AlarmClockActivity.class);
             startActivity(intent);
@@ -291,9 +249,15 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
             Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivity(intent);
         }
-        else if(id==R.id.weight_help_setting){
+        */
+        if(id == R.id.weight_help_setting){
             WeightHelperDialogFragment dialogFragment = new WeightHelperDialogFragment();
-            dialogFragment.show(getSupportFragmentManager(),"weightHelperDialogFragment");
+            dialogFragment.show(getSupportFragmentManager(),getString(R.string.tag_weight_helper_dialog_fragment));
+            return true;
+        }
+        else if(id == R.id.helper_action){
+            HalfWeightHelperDialogFragment halfWeightHelperDialogFragment = new HalfWeightHelperDialogFragment();
+            halfWeightHelperDialogFragment.show(getSupportFragmentManager(),getString(R.string.tag_half_weight_helper_dialog_fragment));
             return true;
         }
 
@@ -416,7 +380,6 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
                     mFragmentTags.remove(getString(R.string.tag_fragment_table));
                     mFragmentTags.add(getString(R.string.tag_fragment_table));
                 }
-
                 navMenuIndex = TABLE_NAV_MENU_INDEX;
                 item.setChecked(true);
                 setFragmentVisibilities(getString(R.string.tag_fragment_table));
@@ -427,6 +390,7 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
             case R.id.bottom_nav_calculator:{
                 if(mCalculatorFragment == null){
                     mCalculatorFragment = new CalculatorFragment();
+                    navMenuIndex = CALCULATOR_NAV_MENU_INDEX;
                     mFragmentTransaction.add(R.id.main_screen_fragment_container, mCalculatorFragment,
                             getString(R.string.tag_fragment_calculator));
                     mFragmentTransaction.commit();
@@ -469,9 +433,24 @@ public class MainScreen extends AppCompatActivity implements NavigationView.OnNa
             }
 
         }
+        if(mFragment.size() > 0){
+            tableFragmentNotOnTopOfStack();
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void tableFragmentNotOnTopOfStack() {
+        if(mTableFragment != null){
+            int topOfFragment = mFragmentTags.size() - 1;
+            int oneBelowTopStack = topOfFragment - 1;
+            //if the table fragment is just under the top of the stack it means that it was just left
+            if(mFragmentTags.get(oneBelowTopStack) == getString(R.string.tag_fragment_table)){
+                //TODO implement method or interface to save the list from the active table
+                mTableFragment.saveAllTables();
+            }
+        }
     }
 
     /***
