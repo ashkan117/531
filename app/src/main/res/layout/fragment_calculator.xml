@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
+    <data>
+
+        <import type="com.example.ashkan.a531.Interface.ICalculatorFragment"/>
+
+        <variable
+            name="iCalculatorFragment"
+            type="com.example.ashkan.a531.Interface.ICalculatorFragment"/>
+        <variable
+            name="oneRepMax"
+            type="double"/>
+    </data>
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -25,6 +37,7 @@
             style="@style/CalculatorRightTextViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,55)}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView38" />
 
@@ -43,6 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorRightTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,65)}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView42" />
 
@@ -61,6 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorRightTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,60)}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView40" />
 
@@ -89,6 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorRightTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,50)}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView36" />
 
@@ -107,6 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorLeftTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,75)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView23" />
 
@@ -125,6 +142,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorLeftTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,80)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView21" />
 
@@ -133,6 +151,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorLeftTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,90)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView19" />
 
@@ -151,6 +170,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorLeftTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,85)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
@@ -169,6 +189,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorLeftTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,95)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
@@ -197,6 +218,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/CalculatorRightTextViewStyle"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,70)}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
@@ -209,6 +231,7 @@
             android:layout_marginTop="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textStyle="bold"
+            android:text="@{iCalculatorFragment.calculateOneRepMax(oneRepMax,100)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3"

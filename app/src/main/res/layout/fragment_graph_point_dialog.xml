@@ -4,7 +4,7 @@
             android:layout_height="wrap_content"
             android:rowCount="4"
             android:columnCount="2"
-            tools:context="com.example.ashkan.a531.Fragments.GraphPointDialogFragment">
+            tools:context="com.example.ashkan.a531.DialogFragments.GraphPointDialogFragment">
 
 
     <EditText

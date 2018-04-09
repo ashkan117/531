@@ -1,5 +1,7 @@
 package com.example.ashkan.a531.Model;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,15 +12,24 @@ import static com.example.ashkan.a531.Model.Time.AM_PM.PM;
  * Created by Ashkan on 1/20/2018.
  */
 
+@Entity(tableName = "time")
 public class Time implements Parcelable {
+    public static long ONE_DAY_IN_MILLI=24*60*60*1000;
     public static final long ONE_HOUR_IN_MILLI = 60*60*1000;
     public static final long ONE_MINUTE_IN_MILLI = 60*1000;
+
+    @ColumnInfo(name = "hour")
     private int mHour;
+    @ColumnInfo(name = "hour")
     private int mMinute;
+    @ColumnInfo(name = "hour")
     private long mTimeInMilli;
+
+    @ColumnInfo(name = "hour")
     private boolean isAm;
+
+    @ColumnInfo(name = "hour")
     private AM_PM mAM_PM;
-    public static long ONE_DAY_IN_MILLI=24*60*60*1000;
 
     public Time(int hour, int minute) {
         mHour = hour;

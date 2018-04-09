@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.test.rule.ActivityTestRule;
 
 import com.example.ashkan.a531.Activity.MainScreen;
-import com.example.ashkan.a531.Data.DataManager;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,7 +27,7 @@ public class AlarmClockDataTest {
     @Before
     public void setUp(){
         Context context = mActivityTestRule.getActivity().getApplicationContext();
-        DataManager dataManager = DataManager.getInstance();
+        //DataManager dataManager = DataManager.getInstance();
     }
 
     @Test

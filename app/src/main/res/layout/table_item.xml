@@ -20,7 +20,7 @@
     <EditText
         android:id="@+id/bench_press_max_edit_text_view"
         tools:text="160"
-        android:inputType="number"
+        android:inputType="number|textNoSuggestions"
         android:imeOptions="actionDone"
         android:layout_columnWeight="1"
         android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
     <EditText
         android:id="@+id/squat_max_edit_text_view"
         tools:text="190"
-        android:inputType="number"
+        android:inputType="number|textNoSuggestions"
         android:imeOptions="actionDone"
         android:layout_columnWeight="1"
         android:gravity="center"
@@ -44,7 +44,7 @@
     <EditText
         android:id="@+id/deadlift_max_edit_text_view"
         tools:text="280"
-        android:inputType="number"
+        android:inputType="number|textNoSuggestions"
         android:imeOptions="actionDone"
         android:layout_columnWeight="1"
         android:gravity="center"
@@ -56,7 +56,7 @@
     <EditText
         android:id="@+id/ohp_max_edit_text_view"
         tools:text="150"
-        android:inputType="number"
+        android:inputType="number|textNoSuggestions"
         android:imeOptions="actionDone"
         android:layout_columnWeight="1"
         android:gravity="center"

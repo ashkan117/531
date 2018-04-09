@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.example.ashkan.a531"
         minSdkVersion 23
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -22,6 +22,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dataBinding{
+        enabled = true
     }
 }
 
@@ -71,19 +74,19 @@ dependencies {
     testImplementation "android.arch.persistence.room:testing:1.0.0"
 
 
-    androidTestCompile 'android.arch.lifecycle:common:1.0.2'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.android.support.test:runner:0.5'
-    testCompile 'com.android.support:design:27.1.0'
-    testCompile 'com.android.support:appcompat-v7:27.1.0'
-    testCompile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'com.android.support:recyclerview-v7:27.1.0'
-    testCompile 'com.android.support:cardview-v7:27.1.0'
-    testCompile 'com.jjoe64:graphview:4.2.1'
-    androidTestCompile 'com.android.support.test.espresso:espresso-intents:2.1'
-    androidTestCompile 'com.android.support.test:rules:1.0.1'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
-    androidTestCompile 'com.android.support.test:runner:1.0.1'
-    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:3.0.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:1.10.19'
+    testImplementation 'com.android.support.test:runner:0.5'
+    testImplementation 'com.android.support:design:27.1.0'
+    testImplementation 'com.android.support:appcompat-v7:27.1.0'
+    testImplementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'com.android.support:recyclerview-v7:27.1.0'
+    testImplementation 'com.android.support:cardview-v7:27.1.0'
+    testImplementation 'com.jjoe64:graphview:4.2.1'
+    androidTestImplementation 'android.arch.lifecycle:common:1.1.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:2.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.1'
 }

@@ -3,14 +3,12 @@ package com.example.ashkan.a531.Fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,23 +24,24 @@ import android.widget.Button;
 
 import com.example.ashkan.a531.Activity.AlarmClockActivity;
 import com.example.ashkan.a531.Adapters.TableRecycleViewAdapter;
-import com.example.ashkan.a531.Data.ContractClass;
-import com.example.ashkan.a531.Data.OneRepMaxDataBaseHelper;
+import com.example.ashkan.a531.Data.ViewModel.WeekViewModel;
+import com.example.ashkan.a531.DialogFragments.TableFragmentDialog;
+import com.example.ashkan.a531.Interface.TableInterface;
 import com.example.ashkan.a531.Model.Week;
 import com.example.ashkan.a531.R;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-
-import static com.example.ashkan.a531.Data.DataManager.contentValuesFromWeek;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TableFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TableFragment extends android.support.v4.app.Fragment implements TableRecycleViewAdapter.EditTextListener,TableFragmentDialog.TableFragmentDialogListener {
+public class TableFragment extends android.support.v4.app.Fragment implements TableRecycleViewAdapter.EditTextListener,
+        TableFragmentDialog.TableFragmentDialogListener,
+        TableInterface{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -53,19 +52,19 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
     private String mParam2;
     private RecyclerView mRecyclerView;
     private TableRecycleViewAdapter mRecycleViewAdapter;
-    private ArrayList<Week> mListOfWeeks;
-    private OneRepMaxDataBaseHelper helperDatabase;
+    private List<Week> mListOfWeeks;
     private Context mContext;
     private Button updateButton;
     private boolean mBeenFocused=false;
     private LinearLayoutManager mLayoutManager;
     private UpdateGraphListener graphListener;
     private FloatingActionButton fab;
-    private ContentResolver mContectResolver;
+    private WeekViewModel mWeekViewModel;
 
     @Override
     public void onPause() {
         super.onPause();
+        mWeekViewModel.updateWeekTable(mListOfWeeks);
     }
 
     @Override
@@ -77,23 +76,23 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
     @Override
     public void insertNewWeek(int weekNumber) {
         Week newWeek = new Week(weekNumber,0,0,0,0);
-        ContentValues values = new ContentValues();
-        values.put(ContractClass.OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER,weekNumber);
-        Uri uri = mContectResolver.insert(ContractClass.OneRepMaxEntry.CONTENT_URI,values);
-        long id = ContentUris.parseId(uri);
-        //setting the Id
-        if(id!=-1){
-            newWeek.setId(id);
-        }//save item in list
-        mListOfWeeks.add(newWeek);
-
-        sortInASC(mListOfWeeks);
-        mRecycleViewAdapter.notifyDataSetChanged();
+        mWeekViewModel.insertNewEmptyWeek(newWeek);
     }
 
+    @Override
+    public void saveAllTables() {
+        if(mListOfWeeks.size() > 0){
+            for(int i = 0; i < mListOfWeeks.size(); i++){
+                //TODO need to implement how to do this
+            }
+            mWeekViewModel.updateWeekTable(mListOfWeeks);
+        }
+    }
+//todo monkey: adb shell monkey -p com.example.ashkan.a531 -v 1000
     public interface  UpdateGraphListener{
         void updateGraphAfterNewTable();
     }
+
 
     public TableFragment() {
         // Required empty public constructor
@@ -122,6 +121,8 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
         inflater.inflate(R.menu.menu_table,menu);
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -141,33 +142,21 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        mContext = getContext();
-        helperDatabase = new OneRepMaxDataBaseHelper(mContext);
-        mContectResolver = getContext().getContentResolver();
-        //request the data in increasing order
-        Cursor listOfWeeksCursor = mContectResolver.query(ContractClass.OneRepMaxEntry.CONTENT_URI,null,null,null, null);
-
-        //mListOfWeeks = DataManager.getListOfWeeks(helperDatabase);
-        mListOfWeeks = listOfWeeksFromCursor(listOfWeeksCursor);
-        sortInASC(mListOfWeeks);
-    }
-
-
-    private ArrayList<Week> listOfWeeksFromCursor(Cursor cursor) {
-        ArrayList<Week> list = new ArrayList<>();
-        while (cursor.moveToNext()){
-            int weekNumber = cursor.getInt(ContractClass.OneRepMaxEntry.COLUMN_INDEX_WEEK_NUMBER);
-            int bench = cursor.getInt(ContractClass.OneRepMaxEntry.COLUMN_INDEX_BENCH_PRESS);
-            int squat = cursor.getInt(ContractClass.OneRepMaxEntry.COLUMN_INDEX_SQUAT);
-            int deadlift = cursor.getInt(ContractClass.OneRepMaxEntry.COLUMN_INDEX_DEADLIFT);
-            int ohp = cursor.getInt(ContractClass.OneRepMaxEntry.COLUMN_INDEX_OHP);
-            Week week = new Week(weekNumber,bench,squat,deadlift,ohp);
-            list.add(week);
+        mWeekViewModel = ViewModelProviders.of(getActivity()).get(WeekViewModel.class);
+        mListOfWeeks = mWeekViewModel.getAllWeeks().getValue();
+        if(mListOfWeeks != null){
+            sortInASC(mListOfWeeks);
         }
-        return list;
+        mWeekViewModel.getAllWeeks().observe(getActivity(), new Observer<List<Week>>() {
+            @Override
+            public void onChanged(@Nullable List<Week> weeks) {
+                mListOfWeeks = sortInASC(weeks);
+                mRecycleViewAdapter.switchList(mListOfWeeks);;
+            }
+        });
     }
 
-    private void sortInASC(ArrayList<Week> list) {
+    private List<Week> sortInASC(List<Week> list) {
         //TODO: How to sort an arraylist of objects (not sure why this method was needed)
         //Receive the data in asc or store it as asc so we dont need to sort it often
 
@@ -183,25 +172,16 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
                         }
                     }
                 });
-
-
-//        for(int i=0;i<list.size()-1;i++){
-//            if(list.get(i).getWeekNumber()>list.get(i+1).getWeekNumber()){
-//                int weekOne = list.get(i).getWeekNumber();
-//                int weekTwo = list.get(i+1).getWeekNumber();
-//                Week temp = list.get(i);
-//                list.set(i,list.get(i+1));
-//                list.set(i+1,temp);
-//            }
+        return list;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             // Inflate the layout for this fragment
-            final View viewGroup = (View) inflater.inflate(R.layout.fragment_table,container,false);
-             setUpRecyclerView(viewGroup);
-            setUpViews(viewGroup);
-            return viewGroup;
+        final View viewGroup = (View) inflater.inflate(R.layout.fragment_table,container,false);
+        setUpRecyclerView(viewGroup);
+        setUpViews(viewGroup);
+        return viewGroup;
     }
 
     private void setUpViews(View viewGroup) {
@@ -216,8 +196,8 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
                     int firstPostion =mLayoutManager.findFirstVisibleItemPosition();
                     int lastPosition = mLayoutManager.findLastVisibleItemPosition();
                     for(int i=firstPostion;i<lastPosition;i++){
-                        SetFragmentItemRecycleViewAdapter.CustomViewHolder holder =
-                                (SetFragmentItemRecycleViewAdapter.CustomViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                        SetFragmentPageRecyclerAdapter.CustomViewHolder holder =
+                                (SetFragmentPageRecyclerAdapter.CustomViewHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
 
                     }
                     */
@@ -272,9 +252,7 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position =viewHolder.getAdapterPosition();
-                deleteWeek(position);
-                mListOfWeeks.remove(position);
-                mRecycleViewAdapter.notifyItemRemoved(position);
+                deleteWeekWithWeekNumber(position);
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -284,12 +262,10 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
         //attach this to recyclerview
     }
 
-    private void deleteWeek(int position) {
+    private void deleteWeekWithWeekNumber(int position) {
         int weekNumber = mListOfWeeks.get(position).getWeekNumber();
-        String where = ContractClass.OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER + "=? ";
-        String[] whereArgs = new String[]{String.valueOf(weekNumber)};
-        mContectResolver.delete(ContractClass.OneRepMaxEntry.CONTENT_URI,where,whereArgs);
-        //DataManager.deleteWeek(weekNumber,helperDatabase);
+        Week weekToDelete = mListOfWeeks.get(position);
+        mWeekViewModel.deleteWeekWithWeekNumber(weekToDelete);
     }
 
     /***
@@ -300,23 +276,7 @@ public class TableFragment extends android.support.v4.app.Fragment implements Ta
      */
     @Override
     public void updateWeek(Week updatedWeek) {
-        for(int i=0;i<mListOfWeeks.size();i++){
-            Week currentWeek = mListOfWeeks.get(i);
-            if(mListOfWeeks.get(i).getWeekNumber() == updatedWeek.getWeekNumber())
-            {
-                mListOfWeeks.set(i,updatedWeek);
-                break;
-            }
-        }
-        //int updatedRows= DataManager.updateWeekEntry(updatedWeek,helperDatabase);
-
-        String where = ContractClass.OneRepMaxEntry.COLUMN_NAME_WEEK_NUMBER + "=? ";
-        String[] whereArgs = new String[]{String.valueOf(updatedWeek.getWeekNumber())};
-        ContentValues values = contentValuesFromWeek(updatedWeek);
-        //Want to update an id so i need to send the Id
-        Uri singleUri = ContentUris.withAppendedId(ContractClass.OneRepMaxEntry.CONTENT_URI, 2);
-        int updatedRows = mContectResolver.update(ContractClass.OneRepMaxEntry.CONTENT_URI,values, where,whereArgs);
-        //mRecycleViewAdapter.notifyDataSetChanged();
+        mWeekViewModel.updateWeek(updatedWeek);
     }
 
 

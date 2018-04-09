@@ -5,17 +5,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
-import com.example.ashkan.a531.Fragments.SetFragmentItem;
+import com.example.ashkan.a531.Fragments.SetFragmentPage;
 import com.example.ashkan.a531.Fragments.SetsFragment;
-import com.example.ashkan.a531.R;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Created by Ashkan on 12/21/2017.
@@ -23,7 +17,7 @@ import java.util.Set;
 
 public class SetFragmentPageAdapter extends FragmentStatePagerAdapter  {
 
-    ArrayList<SetFragmentItem> listOfFragments=new ArrayList<SetFragmentItem>();
+    ArrayList<SetFragmentPage> listOfFragments=new ArrayList<SetFragmentPage>();
     ArrayList<String> title = new ArrayList<>();
     ArrayList<Integer> listOfWeight= new ArrayList<>();
     UpdateTabLayoutListener updateTabLayoutListener;
@@ -39,7 +33,7 @@ public class SetFragmentPageAdapter extends FragmentStatePagerAdapter  {
         int[] onWeightEntered (int positionOfPager, ArrayList<Integer> oneRepMaxList);
     }
 
-    public void displayFragments(ArrayList<SetFragmentItem> list,int position)
+    public void displayFragments(ArrayList<SetFragmentPage> list, int position)
     {
         for(int i=0;i<list.size();i++)
         {
@@ -70,7 +64,7 @@ public class SetFragmentPageAdapter extends FragmentStatePagerAdapter  {
         return POSITION_NONE;
     }
 
-    public void addFragment(int position, SetFragmentItem setsFragmentItem) {
+    public void addFragment(int position, SetFragmentPage setsFragmentItem) {
         //somehow the app is being recreated
         //the add causes the list to continuously add fragments
         if(listOfFragments.size()<=4){
@@ -83,7 +77,7 @@ public class SetFragmentPageAdapter extends FragmentStatePagerAdapter  {
 
     public void replaceFragment(int position, ArrayList<Integer> oneRepMaxList) {
         //displayFragments(listOfFragments,position);
-        listOfFragments.set(position, SetFragmentItem.newInstance(position, oneRepMaxList));
+        listOfFragments.set(position, SetFragmentPage.newInstance(position, oneRepMaxList));
         mOneRepMaxList = new ArrayList<>();
         for (int i=0;i<oneRepMaxList.size();i++) {
             //mOneRepMaxList.set(i,oneRepMaxList.get(i));

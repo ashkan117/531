@@ -1,5 +1,9 @@
 package com.example.ashkan.a531.Model;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,17 +14,32 @@ import com.example.ashkan.a531.R;
  * Created by Ashkan on 12/29/2017.
  */
 
+@Entity(tableName = "week")
 public class Week implements Parcelable{
 
+    @ColumnInfo(name = "week_number")
     private int mWeekNumber;
+
+    @ColumnInfo(name = "bench_press")
     private int mBenchPress;
+
+    @ColumnInfo(name = "squat")
     private int mSquat;
+
+    @ColumnInfo(name = "deadlift")
     private int mDeadlift;
+
+    @ColumnInfo(name = "overhead_press")
     private int mOhp;
-    private long mId;
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    private int mId;
 
     public Week(){}
 
+    //Can only have one valid constructor for Roonm
+    @Ignore
     public Week(int weekNumber, int benchPress, int squat, int deadlift, int ohp){
         mWeekNumber =weekNumber;
         mBenchPress =benchPress;
@@ -48,6 +67,20 @@ public class Week implements Parcelable{
             return new Week[size];
         }
     };
+
+        @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mWeekNumber);
+        dest.writeInt(mBenchPress);
+        dest.writeInt(mSquat);
+        dest.writeInt(mDeadlift);
+        dest.writeInt(mOhp);
+    }
 
     public void setWeekNumber(int weekNumber){
         mWeekNumber=weekNumber;
@@ -106,25 +139,12 @@ public class Week implements Parcelable{
         return;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         mId = id;
     }
 
-    public long getId() {
+    public int getId() {
         return mId;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mWeekNumber);
-        dest.writeInt(mBenchPress);
-        dest.writeInt(mSquat);
-        dest.writeInt(mDeadlift);
-        dest.writeInt(mOhp);
-    }
 }
